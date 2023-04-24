@@ -1,0 +1,25 @@
+services:
+  api:
+    depends_on:
+      - db
+    networks:
+      - app-net
+  db:
+    env_file:
+      - .env
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    networks:
+      - app-net
+    volumes:
+      - quotes:/var/lib/postgresql/data
+    ports:
+      -"5432:5432"
+
+volumes:
+  quotes:
+
+networks:
+  app-net:
+    driver: bridge
