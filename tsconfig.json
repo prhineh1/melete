@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
+    "forceConsistentCasingInFileNames": true,
+    "target": "ESNext",
+    "strict": true,
+    "outDir": "dist",
+    "removeComments": true,
+    "sourceMap": true,
+    "allowJs": true,
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "prisma",
+    "src/generated"
+  ],
+  "include": [
+    "src/bridges/*",
+    "src/crawlers/*",
+    "src/server/*"
+  ]
+}

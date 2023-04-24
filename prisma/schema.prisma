@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  directUrl         = env("DIRECT_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model Philosopher {
+  id     Int              @id
+  name   String
+  quotes Quote[]
+  eras   PhilosopherEra[]
+}
+
+model Quote {
+  id       Int          @id
+  authorId Int?
+  author   Philosopher? @relation(fields: [authorId], references: [id])
+  text     String
+  eras     QuoteEra[]
+}
+
+model Era {
+  id           Int              @id
+  era          String
+  philosophers PhilosopherEra[]
+  quotes       QuoteEra[]
+}
+
+model PhilosopherEra {
+  philosopherId Int
+  eraId         Int
+  Philosopher   Philosopher @relation(fields: [philosopherId], references: [id])
+  Era           Era         @relation(fields: [eraId], references: [id])
+
+  @@id([philosopherId, eraId])
+}
+
+model QuoteEra {
+  quoteId Int
+  eraId   Int
+  Quote   Quote @relation(fields: [quoteId], references: [id])
+  Era     Era   @relation(fields: [eraId], references: [id])
+
+  @@id([quoteId, eraId])
+}
+
+view randomquote {
+  name String?
+  text String  @unique
+  era  String?
+}

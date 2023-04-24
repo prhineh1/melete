@@ -1,0 +1,8 @@
+node_modules/
+.env
+dist/*
+*.csv
+prisma/seeds/*
+src/generated/*
+*.pem
+*.DS_Store

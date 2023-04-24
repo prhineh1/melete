@@ -1,0 +1,38 @@
+services:
+  api:
+    build: 
+      context: .
+      dockerfile: dev.dockerfile
+    depends_on:
+      - db
+    networks:
+      - app-net
+    volumes:
+      - ./static:/app/static
+      - ./src:/app/src
+      - ./prisma/seeds:/app/prisma/seeds
+    ports:
+      - "8080:8080" # node server
+      - "5555:5555" # prisma studio (npx prisma studio)
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/postgres
+      - DIRECT_URL=postgresql://postgres:password@db:5432/postgres
+      - SHADOW_DATABASE_URL=postgresql://postgres:password@db:5432/postgres
+  db:
+    hostname: db
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_PASSWORD=password
+    networks:
+      - app-net
+    volumes:
+      - philosophers:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  philosophers:
+
+networks:
+  app-net:
+    driver: bridge
