@@ -1,32 +1,85 @@
 // see: https://www.typescriptlang.org/docs/handbook/esm-node.html for this syntax
 import jsdom = require("jsdom");
+import { FileHandle, open, writeFile } from "node:fs/promises";
 
-const INITIAL_URL = "https://en.wikipedia.org/wiki/Socrates";
+const INITIAL_URL = "https://en.wikipedia.org/wiki/Confucius";
 const { JSDOM } = jsdom;
-
-enum NodeType {
-    TEXT = 3
-}
 
 enum NodeName {
     UL = "UL",
     H2 = "H2"
 }
 
-async function parseWikiPage(url: string) {
+let id = 1; // id for Quotes table
+
+/**
+ * open "Quotes.csv" exists in root project dir
+ * create if it doesn't exist
+ * add csv headers if they don't exist
+ */
+async function getFile(): Promise<FileHandle> {
+    let file = await open('../quotes.csv', 'a+');
+    const firstLine = (await file.readLines()[Symbol.asyncIterator]().next()).value;
+    
+    // if file has content, return as is
+    if (firstLine) {
+        return open('../quotes.csv', 'a');
+    }
+
+    // otherwise append header and return
+    file = await open('../quotes.csv', 'a')
+    await file.appendFile("id,author,text\n");
+    return file;
+}
+
+async function appendToCsv(quotes: string[], author: string = "") {
+    const csv = await getFile();
+    const data = quotes.map(quote => `${id++},${author},${quote}`).join("\n");
+    await csv.appendFile(data);
+    await csv.close();
+}
+
+async function parseWikiquotePage(url?: string) {
+    if (!url) {
+        return;
+    }
+
+    const { window: { document } } = await JSDOM.fromURL(url);
+    const name = (document.querySelector('.mw-page-title-main') as HTMLElement | null)?.textContent?.trim();
+
+    // start at element after h2 "Quotes" heading
+    const next = document.querySelector("#Quotes")?.parentElement?.nextElementSibling ?? null;
+    const quotes = findQuoteNodes(next);
+
+    appendToCsv(quotes, name);
+}
+
+async function parseWikipediaPage(url: string) {
     const { window: { document } } = await JSDOM.fromURL(url);
 
-    // navigate to wikiquote page
+    // process wikiquote page
     const wikiquoteAnchor = (document.querySelector('[href*="wikiquote"]') as HTMLAnchorElement | null)?.href;
+    parseWikiquotePage(wikiquoteAnchor);
 
-    if (wikiquoteAnchor) {
-        const dom = await JSDOM.fromURL(wikiquoteAnchor);
-        const name = (dom.window.document.querySelector('.mw-page-title-main') as HTMLElement | null)?.textContent;
-
-        // start at element after h2 "Quotes" heading
-        const next = dom.window.document.querySelector("#Quotes")?.parentElement?.nextElementSibling ?? null;
-        const quotes = findQuoteNodes(next);
+    // process links on wikipedia page
+    let influence: HTMLAnchorElement[], influenceHrefs: string[];
+    // influences/influced links in collapsable sections
+    influence = Array.from(document.querySelectorAll('.infobox-full-data > div > ul a:not([href*="#"])'));
+    
+    // influences/influenced links in non-collapsed sections 
+    if (!influence.length) {
+        influence = [];
+        const tableRows = document.querySelectorAll('.infobox.biography.vcard > tbody > tr > th');
+        for (const row of tableRows) {
+            const text = row.textContent?.toLowerCase()
+            if (text === "influences" || text == "influenced" && row.nextElementSibling) {
+                influence = ([...influence, ...row.nextElementSibling!.querySelectorAll('a:not([href*="#"])')] as HTMLAnchorElement[]);
+            }
+        }
     }
+
+    influenceHrefs = influence.map(a => (a as HTMLAnchorElement).href);
+    console.log(influenceHrefs);
 }
 
 function findQuoteNodes(next: Element | null): string[] {
@@ -59,6 +112,7 @@ function getTextContent(nodeList: ChildNode[], text: string = ""): string {
         return true;
     });
 
+    // base case
     if (!nodeList.length) {
         return text;
     }
@@ -67,11 +121,11 @@ function getTextContent(nodeList: ChildNode[], text: string = ""): string {
         if (node.textContent) {
             const trimmedText = node.textContent.trim();
 
+            // beginning of text
             if (!text) {
-                // beginning of text
                 text += trimmedText;
-            } else if ([".",",",";","?","!",":","-","\u2014"].some(punc => punc === trimmedText[0])) {
-                // textNode begins with punctuation 
+            // textNode begins with punctuation
+            } else if ([".",",",";","?","!",":","-","\u2014"].some(punc => punc === trimmedText[0])) { 
                 text += trimmedText;
             } else {
                 text += " " + trimmedText;
@@ -85,4 +139,4 @@ function getTextContent(nodeList: ChildNode[], text: string = ""): string {
     return getTextContent(nodeList, text);
 }
 
-parseWikiPage(INITIAL_URL);
+parseWikipediaPage(INITIAL_URL);
