@@ -1,6 +1,6 @@
 // see: https://www.typescriptlang.org/docs/handbook/esm-node.html for this syntax
 import jsdom = require("jsdom");
-import { FileHandle, open } from "node:fs/promises";
+import { FileHandle, open, rm } from "node:fs/promises";
 
 const philosopherUrlsLists = [
   "https://en.wikipedia.org/wiki/List_of_philosophers_(A%E2%80%93C)",
@@ -57,6 +57,7 @@ export async function getFile(
   path: string,
   headers: string
 ): Promise<FileHandle> {
+  await rm(path, { force: true });
   let file = await open(path, "a+");
   const firstLine = (await file.readLines()[Symbol.asyncIterator]().next())
     .value;
@@ -71,4 +72,19 @@ export async function getFile(
   file = await open(path, "a");
   await file.appendFile(`${headers}\n`);
   return file;
+}
+
+export async function createMapping(
+  varName: string,
+  data: string,
+  path: string
+) {
+  await rm(path, { force: true });
+
+  const start = `const ${varName} = new Map([`;
+  const end = `]);export default ${varName};`;
+
+  let file = await open(path, "a");
+  file.appendFile(`${start}${data}${end}\n\n\n`);
+  file.close();
 }

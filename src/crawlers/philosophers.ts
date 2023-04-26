@@ -1,16 +1,31 @@
 import { join } from "path";
-import { getFile, getLinks } from "../utils.js";
+import { createMapping, getFile, getLinks } from "../utils.js";
 import { cwd } from "process";
 import jsdom = require("jsdom");
 
 let id = 1;
 const { JSDOM } = jsdom;
 
-async function appendToCsv(data: string[]) {
-  const csv = await getFile(join(cwd(), "philosopher.csv"), "name,id");
-  const csvData = data.map((name) => `${name},${id++}`).join("\n");
+function createMapData(data: string[]): string {
+  let str = "";
+
+  for (const pair of data) {
+    let [left, right] = pair.split(",");
+    right = `\"${right}\"`;
+    str += `[${right},${left}],`;
+  }
+
+  return str;
+}
+
+async function appendToCsv(data: string[]): Promise<string[]> {
+  const csv = await getFile(join(cwd(), "philosopher.csv"), "id,name");
+  const pairedData = data.map((name) => `${id++},${name}`);
+  const csvData = pairedData.join("\n");
   await csv.appendFile(csvData);
   await csv.close();
+
+  return pairedData;
 }
 
 async function getNames() {
@@ -40,7 +55,10 @@ async function getNames() {
       names.push(name);
     }
   }
-  appendToCsv(names);
+
+  const pairs = await appendToCsv(names);
+  const mapData = createMapData(pairs);
+  createMapping("philToId", mapData, join(cwd(), "/src/generated/philToId.ts"));
 }
 
 getNames();

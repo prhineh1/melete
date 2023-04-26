@@ -1,6 +1,5 @@
 // see: https://www.typescriptlang.org/docs/handbook/esm-node.html for this syntax
 import jsdom = require("jsdom");
-import { FileHandle, open } from "node:fs/promises";
 import { getLinks, getFile } from "../utils.js";
 import { join } from "node:path";
 import { cwd } from "node:process";
