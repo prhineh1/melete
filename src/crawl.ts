@@ -1,8 +1,8 @@
 // see: https://www.typescriptlang.org/docs/handbook/esm-node.html for this syntax
 import jsdom = require("jsdom");
-import { FileHandle, open, writeFile } from "node:fs/promises";
+import { FileHandle, open } from "node:fs/promises";
+import getLinks from "./getLinks.js";
 
-const INITIAL_URL = "https://en.wikipedia.org/wiki/Confucius";
 const { JSDOM } = jsdom;
 
 enum NodeName {
@@ -24,6 +24,7 @@ async function getFile(): Promise<FileHandle> {
 
   // if file has content, return as is
   if (firstLine) {
+    file.close();
     return open("../quotes.csv", "a");
   }
 
@@ -40,69 +41,31 @@ async function appendToCsv(quotes: string[], author: string = "") {
   await csv.close();
 }
 
-async function parseWikiquotePage(url?: string) {
-  if (!url) {
+async function parseWikiquotePage(url: string) {
+  let doc: Document;
+
+  try {
+    const {
+      window: { document },
+    } = await JSDOM.fromURL(url);
+    doc = document;
+  } catch (err) {
+    console.error("can't load page: " + url);
     return;
   }
 
-  const {
-    window: { document },
-  } = await JSDOM.fromURL(url);
+  console.log("parsing quotes from: " + url);
+
   const name = (
-    document.querySelector(".mw-page-title-main") as HTMLElement | null
+    doc.querySelector(".mw-page-title-main") as HTMLElement | null
   )?.textContent?.trim();
 
   // start at element after h2 "Quotes" heading
   const next =
-    document.querySelector("#Quotes")?.parentElement?.nextElementSibling ??
-    null;
+    doc.querySelector("#Quotes")?.parentElement?.nextElementSibling ?? null;
   const quotes = findQuoteNodes(next);
 
-  appendToCsv(quotes, name);
-}
-
-async function parseWikipediaPage(url: string) {
-  const {
-    window: { document },
-  } = await JSDOM.fromURL(url);
-
-  // process wikiquote page
-  const wikiquoteAnchor = (
-    document.querySelector('[href*="wikiquote"]') as HTMLAnchorElement | null
-  )?.href;
-  parseWikiquotePage(wikiquoteAnchor);
-
-  // process links on wikipedia page
-  let influence: HTMLAnchorElement[], influenceHrefs: string[];
-  // influences/influced links in collapsable sections
-  influence = Array.from(
-    document.querySelectorAll(
-      '.infobox-full-data > div > ul a:not([href*="#"])'
-    )
-  );
-
-  // influences/influenced links in non-collapsed sections
-  if (!influence.length) {
-    influence = [];
-    const tableRows = document.querySelectorAll(
-      ".infobox.biography.vcard > tbody > tr > th"
-    );
-    for (const row of tableRows) {
-      const text = row.textContent?.toLowerCase();
-      if (
-        text === "influences" ||
-        (text == "influenced" && row.nextElementSibling)
-      ) {
-        influence = [
-          ...influence,
-          ...row.nextElementSibling!.querySelectorAll('a:not([href*="#"])'),
-        ] as HTMLAnchorElement[];
-      }
-    }
-  }
-
-  influenceHrefs = influence.map((a) => (a as HTMLAnchorElement).href);
-  console.log(influenceHrefs);
+  await appendToCsv(quotes, name);
 }
 
 function findQuoteNodes(next: Element | null): string[] {
@@ -113,7 +76,7 @@ function findQuoteNodes(next: Element | null): string[] {
     if (next.nodeName === NodeName.UL) {
       const li = next.firstChild;
 
-      if (li) {
+      if (li && li.childNodes.length) {
         const quote = getTextContent([...li.childNodes]);
         quotes.push(quote.trim());
       }
@@ -166,4 +129,11 @@ function getTextContent(nodeList: ChildNode[], text: string = ""): string {
   return getTextContent(nodeList, text);
 }
 
-parseWikipediaPage(INITIAL_URL);
+console.time("crawl");
+
+const quotePages = await getLinks();
+
+for (const link of quotePages) {
+  await parseWikiquotePage(link.replace("wikipedia", "wikiquote"));
+}
+console.timeEnd("crawl");
