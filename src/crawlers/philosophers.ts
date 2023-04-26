@@ -10,16 +10,19 @@ function createMapData(data: string[]): string {
   let str = "";
 
   for (const pair of data) {
-    let [left, right] = pair.split(",");
-    right = `\"${right}\"`;
-    str += `[${right},${left}],`;
+    let [id, name] = pair.split(",");
+    name = `\"${name}\"`;
+    str += `[${name},${id}],`;
   }
 
   return str;
 }
 
 async function appendToCsv(data: string[]): Promise<string[]> {
-  const csv = await getFile(join(cwd(), "philosopher.csv"), "id,name");
+  const csv = await getFile(
+    join(cwd(), "philosopher.csv"),
+    "philosopherId,name"
+  );
   const pairedData = data.map((name) => `${id++},${name}`);
   const csvData = pairedData.join("\n");
   await csv.appendFile(csvData);
@@ -58,7 +61,7 @@ async function getNames() {
 
   const pairs = await appendToCsv(names);
   const mapData = createMapData(pairs);
-  createMapping("philToId", mapData, join(cwd(), "/src/generated/philToId.ts"));
+  createMapping(mapData, join(cwd(), "/src/generated/philToId.ts"));
 }
 
 getNames();

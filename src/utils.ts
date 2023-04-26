@@ -55,9 +55,13 @@ export async function getLinks(): Promise<string[]> {
  */
 export async function getFile(
   path: string,
-  headers: string
+  headers: string,
+  noDelete?: boolean
 ): Promise<FileHandle> {
-  await rm(path, { force: true });
+  if (!noDelete) {
+    await rm(path, { force: true });
+  }
+
   let file = await open(path, "a+");
   const firstLine = (await file.readLines()[Symbol.asyncIterator]().next())
     .value;
@@ -74,17 +78,13 @@ export async function getFile(
   return file;
 }
 
-export async function createMapping(
-  varName: string,
-  data: string,
-  path: string
-) {
+export async function createMapping(data: string, path: string) {
   await rm(path, { force: true });
 
-  const start = `const ${varName} = new Map([`;
-  const end = `]);export default ${varName};`;
+  const start = `export default new Map([`;
+  const end = `]);`;
 
   let file = await open(path, "a");
-  file.appendFile(`${start}${data}${end}\n\n\n`);
+  file.appendFile(`${start}${data}${end}`);
   file.close();
 }
