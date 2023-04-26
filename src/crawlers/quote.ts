@@ -1,7 +1,9 @@
 // see: https://www.typescriptlang.org/docs/handbook/esm-node.html for this syntax
 import jsdom = require("jsdom");
 import { FileHandle, open } from "node:fs/promises";
-import getLinks from "./getLinks.js";
+import { getLinks, getFile } from "../utils.js";
+import { join } from "node:path";
+import { cwd } from "node:process";
 
 const { JSDOM } = jsdom;
 
@@ -12,30 +14,8 @@ enum NodeName {
 
 let id = 1; // id for Quotes table
 
-/**
- * open "Quotes.csv" exists in root project dir
- * create if it doesn't exist
- * add csv headers if they don't exist
- */
-async function getFile(): Promise<FileHandle> {
-  let file = await open("../quotes.csv", "a+");
-  const firstLine = (await file.readLines()[Symbol.asyncIterator]().next())
-    .value;
-
-  // if file has content, return as is
-  if (firstLine) {
-    file.close();
-    return open("../quotes.csv", "a");
-  }
-
-  // otherwise append header and return
-  file = await open("../quotes.csv", "a");
-  await file.appendFile("id,author,text\n");
-  return file;
-}
-
 async function appendToCsv(quotes: string[], author: string = "") {
-  const csv = await getFile();
+  const csv = await getFile(join(cwd(), "quote.csv"), "id,author,text");
   const data = quotes.map((quote) => `${id++},${author},${quote}`).join("\n");
   await csv.appendFile(data);
   await csv.close();

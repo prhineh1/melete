@@ -1,8 +1,8 @@
 // see: https://www.typescriptlang.org/docs/handbook/esm-node.html for this syntax
 import jsdom = require("jsdom");
-import { open } from "node:fs/promises";
+import { FileHandle, open } from "node:fs/promises";
 
-const philosopherUrls = [
+const philosopherUrlsLists = [
   "https://en.wikipedia.org/wiki/List_of_philosophers_(A%E2%80%93C)",
   "https://en.wikipedia.org/wiki/List_of_philosophers_(D%E2%80%93H)",
   "https://en.wikipedia.org/wiki/List_of_philosophers_(I%E2%80%93Q)",
@@ -12,7 +12,6 @@ const philosopherUrls = [
 const { JSDOM } = jsdom;
 
 /**
- *
  * collects links from alphabetical List of philosophers page
  */
 async function collectLinks(url: string): Promise<string[]> {
@@ -40,11 +39,36 @@ async function collectLinks(url: string): Promise<string[]> {
   return links;
 }
 
-export default async function getLinks(): Promise<string[]> {
+export async function getLinks(): Promise<string[]> {
   let links: string[] = [];
 
-  for (const link of philosopherUrls) {
+  for (const link of philosopherUrlsLists) {
     links = links.concat(await collectLinks(link));
   }
   return links;
+}
+
+/**
+ * opens file at "path" if it exists
+ * create if it doesn't exist
+ * add csv headers if they don't exist
+ */
+export async function getFile(
+  path: string,
+  headers: string
+): Promise<FileHandle> {
+  let file = await open(path, "a+");
+  const firstLine = (await file.readLines()[Symbol.asyncIterator]().next())
+    .value;
+
+  // if file has content, return as is
+  if (firstLine) {
+    file.close();
+    return open(path, "a");
+  }
+
+  // otherwise append header and return
+  file = await open(path, "a");
+  await file.appendFile(`${headers}\n`);
+  return file;
 }
