@@ -46,7 +46,7 @@ async function getEras(
       const dom = await JSDOM.fromURL(anchor.href);
       const era = getMainTitle(dom.window.document);
       if (era) {
-        eras.push(era);
+        eras.push(`\"${era}\"`);
       }
     } catch {
       console.log("couldn't load: " + anchor.href);

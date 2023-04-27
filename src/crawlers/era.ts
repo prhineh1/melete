@@ -44,7 +44,7 @@ async function getEras(): Promise<[Set<string>, string]> {
       try {
         const dom = await JSDOM.fromURL(anchor.href);
         const era = getMainTitle(dom.window.document);
-        if (era && name) {
+        if (era) {
           duplicates.add(era);
           eras.push(`\"${era}\"`);
         }
@@ -55,7 +55,10 @@ async function getEras(): Promise<[Set<string>, string]> {
     }
 
     if (name && eras.length) {
-      mappingData += `[${philToId.get(name)},[${eras}]],`;
+      const philId = philToId.get(name);
+      if (philId) {
+        mappingData += `[${philId},[${eras}]],`;
+      }
     }
   }
 
