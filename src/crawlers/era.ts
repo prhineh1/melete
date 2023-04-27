@@ -39,14 +39,14 @@ async function getEras(): Promise<[Set<string>, string]> {
     let name = getMainTitle(doc);
     const eraAnchors = getEraAnchors(doc);
 
-    const eras = [];
+    const eras: Set<string> = new Set<string>();
     for (const anchor of eraAnchors) {
       try {
         const dom = await JSDOM.fromURL(anchor.href);
         const era = getMainTitle(dom.window.document);
         if (era) {
           duplicates.add(era);
-          eras.push(`\"${era}\"`);
+          eras.add(era);
         }
       } catch {
         console.log("couldn't load: " + anchor.href);
@@ -54,10 +54,10 @@ async function getEras(): Promise<[Set<string>, string]> {
       }
     }
 
-    if (name && eras.length) {
+    if (name && eras.size) {
       const philId = philToId.get(name);
       if (philId) {
-        mappingData += `[${philId},[${eras}]],`;
+        mappingData += `[${philId},[${[...eras].map((era) => `\"${era}\"`)}]],`;
       }
     }
   }

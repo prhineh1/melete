@@ -38,15 +38,15 @@ async function createCsv(quotes: Quote[]) {
 
 async function getEras(
   eraAnchors: NodeListOf<HTMLAnchorElement>
-): Promise<string[]> {
-  const eras = [];
+): Promise<Set<string>> {
+  const eras = new Set<string>();
 
   for (const anchor of eraAnchors) {
     try {
       const dom = await JSDOM.fromURL(anchor.href);
       const era = getMainTitle(dom.window.document);
       if (era) {
-        eras.push(`\"${era}\"`);
+        eras.add(era);
       }
     } catch {
       console.log("couldn't load: " + anchor.href);
@@ -59,7 +59,7 @@ async function getEras(
 
 async function parseWikipediaPage(
   url: string
-): Promise<[string | undefined, string[] | undefined]> {
+): Promise<[string | undefined, Set<string> | undefined]> {
   let doc: Document;
 
   try {
@@ -109,7 +109,7 @@ async function parseWikiquotePage(): Promise<Quote[]> {
       const quotesWithAuthor: Quote[] = quotes.map((quote) => ({
         authorId: philToId.get(name),
         text: quote,
-        eras,
+        eras: [...(eras ?? [])].map((era) => `\"${era}\"`),
       }));
       quoteData = quoteData.concat(quotesWithAuthor);
     }
