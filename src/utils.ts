@@ -55,12 +55,9 @@ export async function getLinks(): Promise<string[]> {
  */
 export async function getFile(
   path: string,
-  headers: string,
-  noDelete?: boolean
+  headers: string
 ): Promise<FileHandle> {
-  if (!noDelete) {
-    await rm(path, { force: true });
-  }
+  await rm(path, { force: true });
 
   let file = await open(path, "a+");
   const firstLine = (await file.readLines()[Symbol.asyncIterator]().next())
@@ -87,4 +84,100 @@ export async function createMapping(data: string, path: string) {
   let file = await open(path, "a");
   file.appendFile(`${start}${data}${end}`);
   file.close();
+}
+
+export function getMainTitle(doc: Document): string | undefined {
+  return doc
+    .querySelector(".mw-page-title-main")
+    ?.textContent?.replace(/\(.*\)$/, "")
+    .trim()
+    .toLocaleLowerCase();
+}
+
+export function createEntityToIdData(data: string[]): string {
+  let str = "";
+
+  for (const pair of data) {
+    let [id, name] = pair.split(",");
+    name = `\"${name}\"`;
+    str += `[${name},${id}],`;
+  }
+
+  return str;
+}
+
+export function getEraAnchors(doc: Document): NodeListOf<HTMLAnchorElement> {
+  const [eraTh] = Array.from(
+    doc.querySelectorAll(".infobox.biography.vcard th.infobox-label")
+  ).filter((th) => th.textContent?.trim().toLocaleLowerCase() === "era");
+
+  return (
+    (eraTh?.parentElement?.querySelectorAll(
+      'a:not([href*="#"])'
+    ) as NodeListOf<HTMLAnchorElement>) ?? []
+  );
+}
+
+type QueueNode<T> = {
+  val: T;
+  next: QueueNode<T> | null;
+};
+
+export default class Queue<T> {
+  private head: QueueNode<T> | null;
+  private tail: QueueNode<T> | null;
+  public length: number;
+
+  constructor() {
+    this.head = this.tail = null;
+    this.length = 0;
+  }
+
+  [Symbol.iterator]() {
+    let node: QueueNode<T> | null = null;
+
+    return {
+      next: () => {
+        if (!node && this.head) {
+          node = this.head;
+          return { value: node.val, done: false };
+        }
+        if (node?.next) {
+          node = node.next;
+          return { value: node.val, done: false };
+        }
+        return { done: true };
+      },
+    };
+  }
+
+  enqueue(val: T) {
+    const node = { val, next: null };
+    if (!this.tail) {
+      this.head = this.tail = node;
+    } else {
+      const tail = this.tail;
+      this.tail = node;
+      tail.next = node;
+    }
+
+    this.length++;
+  }
+
+  deque(): T | null {
+    if (!this.head) {
+      return null;
+    }
+
+    const head = this.head;
+    this.head = this.head.next;
+    head.next = null;
+    this.length--;
+
+    if (!this.length) {
+      this.head = this.tail = null;
+    }
+
+    return head.val;
+  }
 }

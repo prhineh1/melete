@@ -1,29 +1,19 @@
 import { join } from "path";
-import { createMapping, getFile, getLinks } from "../utils.js";
+import {
+  createEntityToIdData,
+  createMapping,
+  getFile,
+  getLinks,
+  getMainTitle,
+} from "../utils.js";
 import { cwd } from "process";
 import jsdom = require("jsdom");
 
-let id = 1;
 const { JSDOM } = jsdom;
 
-function createMapData(data: string[]): string {
-  let str = "";
-
-  for (const pair of data) {
-    let [id, name] = pair.split(",");
-    name = `\"${name}\"`;
-    str += `[${name},${id}],`;
-  }
-
-  return str;
-}
-
 async function appendToCsv(data: string[]): Promise<string[]> {
-  const csv = await getFile(
-    join(cwd(), "philosopher.csv"),
-    "philosopherId,name"
-  );
-  const pairedData = data.map((name) => `${id++},${name}`);
+  const csv = await getFile(join(cwd(), "philosopher.csv"), "id,name");
+  const pairedData = data.map((name, idx) => `${idx + 1},${name}`);
   const csvData = pairedData.join("\n");
   await csv.appendFile(csvData);
   await csv.close();
@@ -48,11 +38,7 @@ async function getNames() {
       continue;
     }
 
-    let name = doc
-      .querySelector(".mw-page-title-main")
-      ?.textContent?.replace(/\(.*\)$/, "")
-      .trim()
-      .toLocaleLowerCase();
+    let name = getMainTitle(doc);
 
     if (name) {
       names.push(name);
@@ -60,8 +46,10 @@ async function getNames() {
   }
 
   const pairs = await appendToCsv(names);
-  const mapData = createMapData(pairs);
-  createMapping(mapData, join(cwd(), "/src/generated/philToId.ts"));
+  createMapping(
+    createEntityToIdData(pairs),
+    join(cwd(), "/src/generated/philToId.ts")
+  );
 }
 
 getNames();

@@ -1,10 +1,15 @@
 // see: https://www.typescriptlang.org/docs/handbook/esm-node.html for this syntax
 import jsdom = require("jsdom");
-import { getLinks, getFile } from "../utils.js";
+import {
+  getLinks,
+  getFile,
+  getMainTitle,
+  getEraAnchors,
+  createMapping,
+} from "../utils.js";
 import { join } from "node:path";
 import { cwd } from "node:process";
 import philToId from "../generated/philToId.js";
-import { rm } from "node:fs/promises";
 
 const { JSDOM } = jsdom;
 
@@ -14,46 +19,47 @@ enum NodeName {
   LI = "LI",
 }
 
-let id = 1; // id for Quotes table
+type Quote = {
+  id?: number;
+  authorId?: number;
+  text: string;
+  eras?: string[];
+};
 
-async function appendToCsv(quotes: string[], author: string = "") {
-  const csv = await getFile(
-    join(cwd(), "quote.csv"),
-    "quoteId,philosopherId,text",
-    true
-  );
+async function createCsv(quotes: Quote[]) {
+  const csv = await getFile(join(cwd(), "quote.csv"), "id,philosopherId,text");
 
-  const mappedId = philToId.get(author);
-  const data = quotes.map((quote) => `${id++},${mappedId},${quote}`).join("\n");
+  const data = quotes
+    .map((quote) => `${quote.id},${quote.authorId},${quote.text}`)
+    .join("\n");
   await csv.appendFile(data);
   await csv.close();
 }
 
-async function parseWikipediaPage(url: string): Promise<string> {
-  let doc: Document;
+async function getEras(
+  eraAnchors: NodeListOf<HTMLAnchorElement>
+): Promise<string[]> {
+  const eras = [];
 
-  try {
-    const {
-      window: { document },
-    } = await JSDOM.fromURL(url);
-    doc = document;
-  } catch (err) {
-    console.error("can't load page: " + url);
-    return "unknown";
+  for (const anchor of eraAnchors) {
+    try {
+      const dom = await JSDOM.fromURL(anchor.href);
+      const era = getMainTitle(dom.window.document);
+      if (era) {
+        eras.push(era);
+      }
+    } catch {
+      console.log("couldn't load: " + anchor.href);
+      continue;
+    }
   }
 
-  const name =
-    (
-      doc.querySelector(".mw-page-title-main") as HTMLElement | null
-    )?.textContent
-      ?.replace(/\(.*\)$/, "")
-      .trim()
-      .toLocaleLowerCase() ?? "unkown";
-
-  return name;
+  return eras;
 }
 
-async function parseWikiquotePage(url: string) {
+async function parseWikipediaPage(
+  url: string
+): Promise<[string | undefined, string[] | undefined]> {
   let doc: Document;
 
   try {
@@ -63,18 +69,52 @@ async function parseWikiquotePage(url: string) {
     doc = document;
   } catch (err) {
     console.error("can't load page: " + url);
-    return;
+    return [undefined, undefined];
   }
 
-  console.log("parsing quotes from: " + url);
+  const name = getMainTitle(doc);
+  const eraAnchors = getEraAnchors(doc);
 
-  // start at element after h2 "Quotes" heading
-  const next =
-    doc.querySelector("#Quotes")?.parentElement?.nextElementSibling ?? null;
-  const quotes = findQuoteNodes(next);
-  const name = await parseWikipediaPage(url.replace("wikiquote", "wikipedia"));
+  return [name, await getEras(eraAnchors)];
+}
 
-  await appendToCsv(quotes, name);
+async function parseWikiquotePage(): Promise<Quote[]> {
+  let quoteData: Quote[] = [];
+  const links = await getLinks();
+
+  for (const link of links) {
+    let doc: Document;
+
+    try {
+      const {
+        window: { document },
+      } = await JSDOM.fromURL(link.replace("wikipedia", "wikiquote"));
+      doc = document;
+    } catch (err) {
+      console.error("can't load page: " + link);
+      continue;
+    }
+
+    console.log("parsing quotes from: " + link);
+
+    // start at element after h2 "Quotes" heading
+    const next =
+      doc.querySelector("#Quotes")?.parentElement?.nextElementSibling ?? null;
+    const quotes = findQuoteNodes(next);
+    const [name, eras] = await parseWikipediaPage(
+      link.replace("wikiquote", "wikipedia")
+    );
+
+    if (name) {
+      const quotesWithAuthor: Quote[] = quotes.map((quote) => ({
+        authorId: philToId.get(name),
+        text: quote,
+        eras,
+      }));
+      quoteData = quoteData.concat(quotesWithAuthor);
+    }
+  }
+  return quoteData;
 }
 
 function findQuoteNodes(next: Element | null): string[] {
@@ -91,8 +131,8 @@ function findQuoteNodes(next: Element | null): string[] {
           const quote = getTextContent([...li.childNodes]);
           quotes.push(quote.trim());
         }
+        li = next.nextElementSibling;
       }
-      li = next.nextElementSibling;
     }
     next = next.nextElementSibling;
   }
@@ -142,10 +182,15 @@ function getTextContent(nodeList: ChildNode[], text: string = ""): string {
   return getTextContent(nodeList, text);
 }
 
-// delete old file
-await rm(join(cwd(), "quote.csv"), { force: true });
-const quotePages = await getLinks();
-
-for (const link of quotePages) {
-  await parseWikiquotePage(link.replace("wikipedia", "wikiquote"));
+async function getQuotes() {
+  const data = await parseWikiquotePage();
+  const dataWithIds = data.map((quote, idx) => ({ id: idx + 1, ...quote }));
+  const forEraMapping = dataWithIds
+    .filter((quote) => quote.eras?.length)
+    .map((quote) => `[${quote.id},[${quote.eras}]],`)
+    .join("\n");
+  createMapping(forEraMapping, join(cwd(), "/src/generated/quoteIdtoEra.ts"));
+  createCsv(dataWithIds);
 }
+
+getQuotes();
