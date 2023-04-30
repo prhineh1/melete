@@ -81,14 +81,18 @@ export async function getFile(
 }
 
 export async function createMapping(data: string, path: string) {
-  await rm(path, { force: true });
+  try {
+    await rm(path, { force: true });
 
-  const start = `export default new Map([`;
-  const end = `]);`;
+    const start = `export default new Map([`;
+    const end = `]);`;
 
-  let file = await open(path, "a");
-  file.appendFile(`${start}${data}${end}`);
-  file.close();
+    let file = await open(path, "a");
+    file.appendFile(`${start}${data}${end}`);
+    file.close();
+  } catch {
+    throw new Error("unable to create mapping between entities");
+  }
 }
 
 export function getMainTitle(doc: Document): string | undefined {
@@ -153,9 +157,11 @@ export default class WorkerPool extends EventEmitter {
   private freeWorkers: WorkerPlus[];
   private tasks: {
     task: string;
+    entity: Entity;
     callback: (err: Error | null, result: unknown | null) => void;
   }[];
   private scriptPath: string;
+  private mutex: Mutex;
 
   constructor(numThreads: number, scriptPath: string) {
     super();
@@ -164,6 +170,7 @@ export default class WorkerPool extends EventEmitter {
     this.freeWorkers = [];
     this.tasks = [];
     this.scriptPath = scriptPath;
+    this.mutex = new Mutex();
 
     for (let i = 0; i < this.numThreads; i++) this.addNewWorker();
 
@@ -171,8 +178,8 @@ export default class WorkerPool extends EventEmitter {
     // the next task pending in the queue, if any.
     this.on(kWorkerFreedEvent, () => {
       if (this.tasks.length > 0) {
-        const { task, callback } = this.tasks.shift()!;
-        this.runTask(task, callback);
+        const { task, entity, callback } = this.tasks.shift()!;
+        this.runTask(task, entity, callback);
       }
     });
   }
@@ -209,18 +216,19 @@ export default class WorkerPool extends EventEmitter {
 
   runTask(
     task: string,
+    entity: Entity,
     callback: (err: Error | null, result: unknown) => void
   ) {
     if (this.freeWorkers.length === 0) {
       // No free threads, wait until a worker thread becomes free.
-      this.tasks.push({ task, callback });
+      this.tasks.push({ task, entity, callback });
       return;
     }
 
     const worker = this.freeWorkers.pop();
     if (worker) {
       worker[kTaskInfo] = new WorkerPoolTaskInfo(callback);
-      worker.postMessage(task);
+      worker.postMessage({ task, entity, mutex: this.mutex });
     }
   }
 
@@ -230,7 +238,61 @@ export default class WorkerPool extends EventEmitter {
 }
 
 export async function createCsv(data: string, path: string, headers: string) {
-  const csv = await getFile(join(cwd(), path), headers);
-  await csv.appendFile(data);
-  await csv.close();
+  try {
+    const csv = await getFile(join(cwd(), path), headers);
+    await csv.appendFile(data);
+    await csv.close();
+  } catch {
+    throw new Error("unable to create csv");
+  }
+}
+
+export enum Entity {
+  PHILOSOPHER = "philosopher",
+  ERA = "era",
+}
+
+export class Mutex {
+  private view: Int32Array;
+  private buffer: SharedArrayBuffer;
+  private readonly Status = {
+    LOCKED: 1,
+    UNLOCKED: 0,
+  };
+
+  constructor(buf?: SharedArrayBuffer) {
+    this.buffer = buf ?? new SharedArrayBuffer(4);
+    this.view = new Int32Array(this.buffer);
+  }
+
+  connect() {
+    return new Mutex(this.buffer);
+  }
+
+  lock() {
+    if (
+      Atomics.compareExchange(
+        this.view,
+        0,
+        this.Status.UNLOCKED,
+        this.Status.LOCKED
+      ) === this.Status.LOCKED
+    ) {
+      Atomics.wait(this.view, 0, this.Status.LOCKED);
+    }
+  }
+
+  unlock() {
+    if (
+      Atomics.compareExchange(
+        this.view,
+        0,
+        this.Status.LOCKED,
+        this.Status.UNLOCKED
+      ) !== this.Status.LOCKED
+    ) {
+      throw new Error("Mutex is an inconsistent state");
+    }
+    Atomics.notify(this.view, 0, 1);
+  }
 }

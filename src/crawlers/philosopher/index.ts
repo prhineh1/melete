@@ -1,45 +1,49 @@
-import os from "node:os";
 import WorkerPool, {
+  Entity,
   createCsv,
   createEntityToIdData,
   createMapping,
-  getLinks,
 } from "../../utils.js";
 import { join } from "node:path";
 import { cwd } from "node:process";
 
-const pool = new WorkerPool(
-  os.availableParallelism(),
-  "crawlers/philosopher/task_processor.js"
-);
-const links = await getLinks();
+export default async function philosopher(
+  links: string[],
+  pool: WorkerPool,
+  entity: Entity
+): Promise<boolean> {
+  try {
+    console.log("Creating philosopher.csv and related items...");
 
-const unfullfilled: Promise<string>[] = links.map((link) => {
-  return new Promise((resolve, reject) => {
-    pool.runTask(link, (err, result) => {
-      if (result) {
-        resolve(result as string);
-      } else {
-        reject(err);
-      }
+    const unfullfilled: Promise<string>[] = links.map((link) => {
+      return new Promise((resolve, reject) => {
+        pool.runTask(link, entity, (err, result) => {
+          if (result) {
+            resolve(result as string);
+          } else {
+            reject(err);
+          }
+        });
+      });
     });
-  });
-});
 
-const settled = await Promise.allSettled(unfullfilled);
-pool.close();
-const fulfilled = settled
-  .filter((res) => res.status === "fulfilled")
-  .map((res, idx) => {
-    if (res.status === "fulfilled") {
-      return `${idx + 1},${res.value!}`;
-    }
-    return "";
-  });
+    const settled = await Promise.allSettled(unfullfilled);
+    const fulfilled = settled.map((res, idx) => {
+      if (res.status === "fulfilled") {
+        return `${idx + 1},${res.value!}`;
+      }
+      return "";
+    });
 
-createMapping(
-  createEntityToIdData(fulfilled),
-  join(cwd(), "/src/generated/philToId.ts")
-);
+    await createMapping(
+      createEntityToIdData(fulfilled),
+      join(cwd(), "/src/generated/phil_to_id.ts")
+    );
 
-createCsv(fulfilled.join("\n"), "philosopher.csv", "id,name");
+    await createCsv(fulfilled.join("\n"), "philosopher.csv", "id,name");
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+}

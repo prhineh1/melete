@@ -9,7 +9,7 @@ import {
 } from "../utils.js";
 import { join } from "node:path";
 import { cwd } from "node:process";
-import philToId from "../generated/philToId.js";
+import philToId from "../generated/phil_to_id.js";
 
 const { JSDOM } = jsdom;
 
