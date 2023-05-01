@@ -161,7 +161,7 @@ export default class WorkerPool extends EventEmitter {
     callback: (err: Error | null, result: unknown | null) => void;
   }[];
   private scriptPath: string;
-  private mutex: Mutex;
+  private mutex: SpinLock;
 
   constructor(numThreads: number, scriptPath: string) {
     super();
@@ -170,7 +170,7 @@ export default class WorkerPool extends EventEmitter {
     this.freeWorkers = [];
     this.tasks = [];
     this.scriptPath = scriptPath;
-    this.mutex = new Mutex();
+    this.mutex = new SpinLock();
 
     for (let i = 0; i < this.numThreads; i++) this.addNewWorker();
 
@@ -252,7 +252,7 @@ export enum Entity {
   ERA = "era",
 }
 
-export class Mutex {
+export class SpinLock {
   private view: Int32Array;
   private buffer: SharedArrayBuffer;
   private readonly Status = {
@@ -266,33 +266,25 @@ export class Mutex {
   }
 
   connect() {
-    return new Mutex(this.buffer);
+    return new SpinLock(this.buffer);
   }
 
   lock() {
-    if (
-      Atomics.compareExchange(
-        this.view,
-        0,
-        this.Status.UNLOCKED,
-        this.Status.LOCKED
-      ) === this.Status.LOCKED
-    ) {
-      Atomics.wait(this.view, 0, this.Status.LOCKED);
+    while (true) {
+      if (
+        Atomics.compareExchange(
+          this.view,
+          0,
+          this.Status.UNLOCKED,
+          this.Status.LOCKED
+        ) === this.Status.UNLOCKED
+      ) {
+        return;
+      }
     }
   }
 
   unlock() {
-    if (
-      Atomics.compareExchange(
-        this.view,
-        0,
-        this.Status.LOCKED,
-        this.Status.UNLOCKED
-      ) !== this.Status.LOCKED
-    ) {
-      throw new Error("Mutex is an inconsistent state");
-    }
-    Atomics.notify(this.view, 0, 1);
+    Atomics.store(this.view, 0, this.Status.UNLOCKED);
   }
 }
