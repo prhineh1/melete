@@ -1,6 +1,9 @@
 import { cwd } from "node:process";
 import { getFile } from "../utils.js";
 import { join } from "node:path";
+import { default as quoteIdtoEra } from "../generated/quoteId_to_era.js";
+import { default as eraToId } from "../generated/era_to_id.js";
+import { default as philIdToEra } from "../generated/philId_to_era.js";
 
 async function createCsv(data: string, csvPath: string, csvHeaders: string) {
   const file = await getFile(join(cwd(), csvPath), csvHeaders);
@@ -26,7 +29,7 @@ function createData(
   return csvData;
 }
 
-export default function createBridge(
+function createBridge(
   idToEntity: Map<number, string[]>,
   entityToId: Map<string, number>,
   csvPath: string,
@@ -34,4 +37,9 @@ export default function createBridge(
 ) {
   const data = createData(idToEntity, entityToId);
   createCsv(data, csvPath, csvHeaders);
+}
+
+export default function createBridges() {
+  createBridge(philIdToEra, eraToId, "philosopherEra.csv", "philId,eraId");
+  createBridge(quoteIdtoEra, eraToId, "quoteEra.csv", "quoteId,eraId");
 }

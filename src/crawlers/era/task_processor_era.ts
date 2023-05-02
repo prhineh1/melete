@@ -9,6 +9,7 @@ export async function getEraData(link: string): Promise<eraResult> {
   let doc;
   const duplicates = []; // for csv data
   let mappingData: eraResult["philToEra"];
+  const eraToEra = [];
 
   try {
     const {
@@ -16,7 +17,7 @@ export async function getEraData(link: string): Promise<eraResult> {
     } = await JSDOM.fromURL(link);
     doc = document;
   } catch (err) {
-    throw new Error(`Can't load page: ${link}`, { cause: err });
+    return {} as eraResult;
   }
 
   let name = getMainTitle(doc);
@@ -25,14 +26,16 @@ export async function getEraData(link: string): Promise<eraResult> {
   const eras: Set<string> = new Set<string>();
   for (const anchor of eraAnchors) {
     try {
+      const hrefText = anchor.textContent?.trim().toLowerCase();
       const dom = await JSDOM.fromURL(anchor.href);
       const era = getMainTitle(dom.window.document);
       if (era) {
         duplicates.push(era);
         eras.add(era);
+        eraToEra.push(`["${hrefText}","${era}"]`);
       }
     } catch {
-      throw new Error(`Can't load page: ${link}`);
+      return {} as eraResult;
     }
   }
 
@@ -46,6 +49,7 @@ export async function getEraData(link: string): Promise<eraResult> {
   const res = {
     era: duplicates,
     philToEra: mappingData,
+    eraToEra,
   };
 
   return res;

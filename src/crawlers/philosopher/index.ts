@@ -29,7 +29,7 @@ export default async function philosopher(
 
     const settled = await Promise.allSettled(unfullfilled);
     const fulfilled = settled
-      .map((res, idx) => {
+      .map((res) => {
         if (res.status === "fulfilled") {
           return res.value;
         }

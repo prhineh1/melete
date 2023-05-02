@@ -3,6 +3,7 @@ import os from "node:os";
 import philosopher from "./philosopher/index.js";
 import era from "./era/index.js";
 import quote from "./quote/index.js";
+import createBridges from "../bridges/index.js";
 
 console.time("quick");
 const pool = new WorkerPool(
@@ -24,6 +25,7 @@ if (philosopherFinished) {
 
   if (eraFinished && quoteFinished) {
     pool.close();
+    createBridges();
     console.log("all done");
     console.timeEnd("quick");
   }

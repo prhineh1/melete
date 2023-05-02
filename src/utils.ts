@@ -161,7 +161,6 @@ export default class WorkerPool extends EventEmitter {
     callback: (err: Error | null, result: unknown | null) => void;
   }[];
   private scriptPath: string;
-  private lock: SpinLock;
 
   constructor(numThreads: number, scriptPath: string) {
     super();
@@ -170,7 +169,6 @@ export default class WorkerPool extends EventEmitter {
     this.freeWorkers = [];
     this.tasks = [];
     this.scriptPath = scriptPath;
-    this.lock = new SpinLock();
 
     for (let i = 0; i < this.numThreads; i++) this.addNewWorker();
 
@@ -228,7 +226,7 @@ export default class WorkerPool extends EventEmitter {
     const worker = this.freeWorkers.pop();
     if (worker) {
       worker[kTaskInfo] = new WorkerPoolTaskInfo(callback);
-      worker.postMessage({ task, entity, lock: this.lock });
+      worker.postMessage({ task, entity });
     }
   }
 
@@ -251,46 +249,4 @@ export enum Entity {
   PHILOSOPHER = "philosopher",
   ERA = "era",
   QUOTE = "quote",
-}
-
-export class SpinLock {
-  private view: Int32Array;
-  private buffer: SharedArrayBuffer;
-  private readonly Status = {
-    LOCKED: 1,
-    UNLOCKED: 0,
-  };
-
-  constructor(buf?: SharedArrayBuffer) {
-    this.buffer = buf ?? new SharedArrayBuffer(8);
-    this.view = new Int32Array(this.buffer);
-    this.view[1] = 1; // used for ids
-  }
-
-  connect() {
-    return new SpinLock(this.buffer);
-  }
-
-  getId() {
-    return Atomics.add(this.view, 1, 1);
-  }
-
-  lock() {
-    while (true) {
-      if (
-        Atomics.compareExchange(
-          this.view,
-          0,
-          this.Status.UNLOCKED,
-          this.Status.LOCKED
-        ) === this.Status.UNLOCKED
-      ) {
-        return;
-      }
-    }
-  }
-
-  unlock() {
-    Atomics.store(this.view, 0, this.Status.UNLOCKED);
-  }
 }

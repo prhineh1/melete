@@ -13,14 +13,8 @@ export async function getPhilosopherData(link: string): Promise<string> {
     doc = document;
   } catch (err) {
     console.log(`Can't load page: ${link}`);
-    throw new Error(`Can't load page: ${link}`, { cause: err });
+    return "";
   }
 
-  const name = getMainTitle(doc);
-
-  if (name) {
-    return name;
-  } else {
-    throw new Error("Unable to parse name.");
-  }
+  return getMainTitle(doc) ?? "";
 }

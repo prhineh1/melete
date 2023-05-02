@@ -1,12 +1,8 @@
 // see: https://www.typescriptlang.org/docs/handbook/esm-node.html for this syntax
 import jsdom = require("jsdom");
-import {
-  createCsv,
-  getMainTitle,
-  getEraAnchors,
-  SpinLock,
-} from "../../utils.js";
+import { getMainTitle, getEraAnchors } from "../../utils.js";
 import philToId from "../../generated/phil_to_id.js";
+import era_to_era from "../../generated/era_to_era.js";
 
 const { JSDOM } = jsdom;
 
@@ -29,15 +25,10 @@ async function getEras(
   const eras = new Set<string>();
 
   for (const anchor of eraAnchors) {
-    try {
-      const dom = await JSDOM.fromURL(anchor.href);
-      const era = getMainTitle(dom.window.document);
-      if (era) {
-        eras.add(era);
-      }
-    } catch {
-      console.log("couldn't load: " + anchor.href);
-      continue;
+    const text = anchor.textContent?.trim().toLowerCase();
+    const era = era_to_era.get(text ?? "");
+    if (era) {
+      eras.add(era);
     }
   }
 
@@ -74,7 +65,7 @@ async function parseWikiquotePage(link: string): Promise<Quote[]> {
     } = await JSDOM.fromURL(link.replace("wikipedia", "wikiquote"));
     doc = document;
   } catch (err) {
-    throw new Error("can't load page " + link);
+    return [];
   }
 
   // start at element after h2 "Quotes" heading
