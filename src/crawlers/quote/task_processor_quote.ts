@@ -1,15 +1,12 @@
 // see: https://www.typescriptlang.org/docs/handbook/esm-node.html for this syntax
 import jsdom = require("jsdom");
 import {
-  getLinks,
-  getFile,
+  createCsv,
   getMainTitle,
   getEraAnchors,
-  createMapping,
-} from "../utils.js";
-import { join } from "node:path";
-import { cwd } from "node:process";
-import philToId from "../generated/phil_to_id.js";
+  SpinLock,
+} from "../../utils.js";
+import philToId from "../../generated/phil_to_id.js";
 
 const { JSDOM } = jsdom;
 
@@ -19,22 +16,12 @@ enum NodeName {
   LI = "LI",
 }
 
-type Quote = {
+export type Quote = {
   id?: number;
   authorId?: number;
   text: string;
   eras?: string[];
 };
-
-async function createCsv(quotes: Quote[]) {
-  const csv = await getFile(join(cwd(), "quote.csv"), "id,philosopherId,text");
-
-  const data = quotes
-    .map((quote) => `${quote.id},${quote.authorId},${quote.text}`)
-    .join("\n");
-  await csv.appendFile(data);
-  await csv.close();
-}
 
 async function getEras(
   eraAnchors: NodeListOf<HTMLAnchorElement>
@@ -78,43 +65,33 @@ async function parseWikipediaPage(
   return [name, await getEras(eraAnchors)];
 }
 
-async function parseWikiquotePage(): Promise<Quote[]> {
-  let quoteData: Quote[] = [];
-  const links = await getLinks();
+async function parseWikiquotePage(link: string): Promise<Quote[]> {
+  let doc: Document;
 
-  for (const link of links) {
-    let doc: Document;
-
-    try {
-      const {
-        window: { document },
-      } = await JSDOM.fromURL(link.replace("wikipedia", "wikiquote"));
-      doc = document;
-    } catch (err) {
-      console.error("can't load page: " + link);
-      continue;
-    }
-
-    console.log("parsing quotes from: " + link);
-
-    // start at element after h2 "Quotes" heading
-    const next =
-      doc.querySelector("#Quotes")?.parentElement?.nextElementSibling ?? null;
-    const quotes = findQuoteNodes(next);
-    const [name, eras] = await parseWikipediaPage(
-      link.replace("wikiquote", "wikipedia")
-    );
-
-    if (name) {
-      const quotesWithAuthor: Quote[] = quotes.map((quote) => ({
-        authorId: philToId.get(name),
-        text: quote,
-        eras: [...(eras ?? [])].map((era) => `\"${era}\"`),
-      }));
-      quoteData = quoteData.concat(quotesWithAuthor);
-    }
+  try {
+    const {
+      window: { document },
+    } = await JSDOM.fromURL(link.replace("wikipedia", "wikiquote"));
+    doc = document;
+  } catch (err) {
+    throw new Error("can't load page " + link);
   }
-  return quoteData;
+
+  // start at element after h2 "Quotes" heading
+  const next =
+    doc.querySelector("#Quotes")?.parentElement?.nextElementSibling ?? null;
+  const quotes = findQuoteNodes(next);
+  const [name, eras] = await parseWikipediaPage(
+    link.replace("wikiquote", "wikipedia")
+  );
+
+  const quotesWithAuthor: Quote[] = quotes.map((quote) => ({
+    authorId: philToId.get(name ?? ""),
+    text: quote,
+    eras: [...(eras ?? [])].map((era) => `\"${era}\"`),
+  }));
+
+  return quotesWithAuthor;
 }
 
 function findQuoteNodes(next: Element | null): string[] {
@@ -182,15 +159,6 @@ function getTextContent(nodeList: ChildNode[], text: string = ""): string {
   return getTextContent(nodeList, text);
 }
 
-async function getQuotes() {
-  const data = await parseWikiquotePage();
-  const dataWithIds = data.map((quote, idx) => ({ id: idx + 1, ...quote }));
-  const forEraMapping = dataWithIds
-    .filter((quote) => quote.eras?.length)
-    .map((quote) => `[${quote.id},[${quote.eras}]],`)
-    .join("\n");
-  createMapping(forEraMapping, join(cwd(), "/src/generated/quoteIdtoEra.ts"));
-  createCsv(dataWithIds);
+export async function getQuoteData(link: string): Promise<Quote[]> {
+  return parseWikiquotePage(link);
 }
-
-getQuotes();

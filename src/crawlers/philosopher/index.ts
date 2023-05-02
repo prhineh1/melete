@@ -28,12 +28,14 @@ export default async function philosopher(
     });
 
     const settled = await Promise.allSettled(unfullfilled);
-    const fulfilled = settled.map((res, idx) => {
-      if (res.status === "fulfilled") {
-        return `${idx + 1},${res.value!}`;
-      }
-      return "";
-    });
+    const fulfilled = settled
+      .map((res, idx) => {
+        if (res.status === "fulfilled") {
+          return res.value;
+        }
+      })
+      .filter((val) => val)
+      .map((val, idx) => `${idx + 1},${val}`);
 
     await createMapping(
       createEntityToIdData(fulfilled),
