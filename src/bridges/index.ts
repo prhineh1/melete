@@ -40,6 +40,11 @@ function createBridge(
 }
 
 export default function createBridges() {
-  createBridge(philIdToEra, eraToId, "philosopherEra.csv", "philId,eraId");
+  createBridge(
+    philIdToEra,
+    eraToId,
+    "philosopherEra.csv",
+    "philosopherId,eraId"
+  );
   createBridge(quoteIdtoEra, eraToId, "quoteEra.csv", "quoteId,eraId");
 }

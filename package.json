@@ -12,10 +12,17 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
   "devDependencies": {
     "@types/jsdom": "^21.1.1",
     "@types/node": "^18.16.0",
     "jsdom": "^21.1.1",
+    "prisma": "^4.13.0",
     "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "@prisma/client": "^4.13.0"
   }
 }

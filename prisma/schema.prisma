@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Philosopher {
+  id             Int              @id
+  name           String
+  quotes         Quote[]
+  PhilosopherEra PhilosopherEra[]
+}
+
+model Quote {
+  id       Int         @id
+  author   Philosopher @relation(fields: [authorId], references: [id])
+  authorId Int
+  text     String
+  QuoteEra QuoteEra[]
+}
+
+model Era {
+  id             Int              @id
+  era            String
+  PhilosopherEra PhilosopherEra[]
+  QuoteEra       QuoteEra[]
+}
+
+model PhilosopherEra {
+  philosopher   Philosopher @relation(fields: [philosopherId], references: [id])
+  philosopherId Int
+  era           Era         @relation(fields: [eraId], references: [id])
+  eraId         Int
+
+  @@id([philosopherId, eraId])
+}
+
+model QuoteEra {
+  quote   Quote @relation(fields: [quoteId], references: [id])
+  quoteId Int
+  era     Era   @relation(fields: [eraId], references: [id])
+  eraId   Int
+
+  @@id([quoteId, eraId])
+}
