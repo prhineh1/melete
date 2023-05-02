@@ -39,7 +39,7 @@ export default async function philosopher(
 
     await createMapping(
       createEntityToIdData(fulfilled),
-      join(cwd(), "/src/generated/phil_to_id.ts")
+      join(cwd(), "/src/generated/phil_to_id.js")
     );
 
     await createCsv(fulfilled.join("\n"), "philosopher.csv", "id,name");

@@ -66,15 +66,15 @@ export default async function era(
 
     await createMapping(
       philToEra,
-      join(cwd(), "/src/generated/philId_to_era.ts")
+      join(cwd(), "/src/generated/philId_to_era.js")
     );
     await createMapping(
       [...new Set(eraToEra)].join(","),
-      join(cwd(), "src/generated/era_to_era.ts")
+      join(cwd(), "src/generated/era_to_era.js")
     );
     await createMapping(
       createEntityToIdData(csvData),
-      join(cwd(), "/src/generated/era_to_id.ts")
+      join(cwd(), "/src/generated/era_to_id.js")
     );
     await createCsv(csvData.join("\n"), "era.csv", "id,era");
 

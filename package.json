@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "compile": "tsc --watch"
+    "compile": "tsc",
+    "crawl": "node dist/crawlers/index.js"
   },
   "type": "module",
   "keywords": [],

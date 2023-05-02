@@ -1,7 +1,7 @@
 import { cwd } from "node:process";
 import { getFile } from "../utils.js";
 import { join } from "node:path";
-import { default as quoteIdtoEra } from "../generated/quoteId_to_era.js";
+import { default as quoteIdtoEra } from "../generated/quoteID_to_era.js";
 import { default as eraToId } from "../generated/era_to_id.js";
 import { default as philIdToEra } from "../generated/philId_to_era.js";
 

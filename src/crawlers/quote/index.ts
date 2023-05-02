@@ -41,7 +41,7 @@ export default async function quote(
 
     await createMapping(
       quoteIdtoEra,
-      join(cwd(), "/src/generated/quoteID_to_era.ts")
+      join(cwd(), "/src/generated/quoteID_to_era.js")
     );
 
     const data = quotes
