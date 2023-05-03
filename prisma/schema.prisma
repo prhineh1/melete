@@ -11,41 +11,41 @@ datasource db {
 }
 
 model Philosopher {
-  id             Int              @id
-  name           String
-  quotes         Quote[]
-  PhilosopherEra PhilosopherEra[]
+  id     Int              @id
+  name   String
+  quotes Quote[]
+  eras   PhilosopherEra[]
 }
 
 model Quote {
-  id       Int         @id
-  author   Philosopher @relation(fields: [authorId], references: [id])
-  authorId Int
+  id       Int          @id
+  authorid Int?
+  author   Philosopher? @relation(fields: [authorid], references: [id])
   text     String
-  QuoteEra QuoteEra[]
+  eras     QuoteEra[]
 }
 
 model Era {
-  id             Int              @id
-  era            String
-  PhilosopherEra PhilosopherEra[]
-  QuoteEra       QuoteEra[]
+  id           Int              @id
+  era          String
+  philosophers PhilosopherEra[]
+  quotes       QuoteEra[]
 }
 
 model PhilosopherEra {
-  philosopher   Philosopher @relation(fields: [philosopherId], references: [id])
-  philosopherId Int
-  era           Era         @relation(fields: [eraId], references: [id])
-  eraId         Int
+  philosopherid Int
+  eraid         Int
+  Philosopher   Philosopher @relation(fields: [philosopherid], references: [id])
+  Era           Era         @relation(fields: [eraid], references: [id])
 
-  @@id([philosopherId, eraId])
+  @@id([philosopherid, eraid])
 }
 
 model QuoteEra {
-  quote   Quote @relation(fields: [quoteId], references: [id])
-  quoteId Int
-  era     Era   @relation(fields: [eraId], references: [id])
-  eraId   Int
+  quoteid Int
+  eraid   Int
+  Quote   Quote @relation(fields: [quoteid], references: [id])
+  Era     Era   @relation(fields: [eraid], references: [id])
 
-  @@id([quoteId, eraId])
+  @@id([quoteid, eraid])
 }

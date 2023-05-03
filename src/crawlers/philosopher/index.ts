@@ -1,6 +1,6 @@
 import WorkerPool, {
   Entity,
-  createCsv,
+  createSeedFile,
   createEntityToIdData,
   createMapping,
 } from "../../utils.js";
@@ -34,15 +34,22 @@ export default async function philosopher(
           return res.value;
         }
       })
-      .filter((val) => val)
-      .map((val, idx) => `${idx + 1},${val}`);
+      .filter((val) => val);
+
+    const mappingData = fulfilled.map((val, idx) => `${idx + 1},${val}`);
+    const csvData = fulfilled.map((val, idx) => ({ id: idx + 1, name: val }));
 
     await createMapping(
-      createEntityToIdData(fulfilled),
-      join(cwd(), "/src/generated/phil_to_id.js")
+      createEntityToIdData(mappingData),
+      join(cwd(), "/src/generated/phil_to_id.js"),
+      "philToId"
     );
 
-    await createCsv(fulfilled.join("\n"), "philosopher.csv", "id,name");
+    await createSeedFile(
+      JSON.stringify(csvData),
+      "prisma/seeds/philosopher.js",
+      "philosopher"
+    );
     return true;
   } catch (err) {
     console.error(err);

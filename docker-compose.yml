@@ -17,12 +17,13 @@ services:
     networks:
       - app-net
     volumes:
-      - quotes:/var/lib/postgresql/data
+      - philosophers:/var/lib/postgresql/data
+      - ./prisma/seeds:/media/seeds
     ports:
       - "5432:5432"
 
 volumes:
-  quotes:
+  philosophers:
 
 networks:
   app-net:

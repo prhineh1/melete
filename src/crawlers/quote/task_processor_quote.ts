@@ -1,8 +1,6 @@
 // see: https://www.typescriptlang.org/docs/handbook/esm-node.html for this syntax
 import jsdom = require("jsdom");
 import { getMainTitle, getEraAnchors } from "../../utils.js";
-import philToId from "../../generated/phil_to_id.js";
-import era_to_era from "../../generated/era_to_era.js";
 
 const { JSDOM } = jsdom;
 
@@ -14,7 +12,7 @@ enum NodeName {
 
 export type Quote = {
   id?: number;
-  authorId?: number;
+  authorId?: number | null;
   text: string;
   eras?: string[];
 };
@@ -23,10 +21,12 @@ async function getEras(
   eraAnchors: NodeListOf<HTMLAnchorElement>
 ): Promise<Set<string>> {
   const eras = new Set<string>();
+  //@ts-ignore
+  const { eraToEra } = import("../../generated/era_to_era.js");
 
   for (const anchor of eraAnchors) {
     const text = anchor.textContent?.trim().toLowerCase();
-    const era = era_to_era.get(text ?? "");
+    const era = eraToEra.get(text ?? "");
     if (era) {
       eras.add(era);
     }
@@ -58,6 +58,8 @@ async function parseWikipediaPage(
 
 async function parseWikiquotePage(link: string): Promise<Quote[]> {
   let doc: Document;
+  //@ts-ignore
+  const { philToId } = import("../../generated/phil_to_id.js");
 
   try {
     const {
@@ -97,7 +99,7 @@ function findQuoteNodes(next: Element | null): string[] {
       while (li?.nodeName === NodeName.LI) {
         if (li && li.childNodes.length) {
           const quote = getTextContent([...li.childNodes]);
-          quotes.push(quote.trim());
+          quotes.push(quote.trim().replaceAll("\n", " "));
         }
         li = next.nextElementSibling;
       }

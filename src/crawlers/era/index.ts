@@ -2,7 +2,7 @@ import { join } from "path";
 import { cwd } from "process";
 import WorkerPool, {
   Entity,
-  createCsv,
+  createSeedFile,
   createEntityToIdData,
   createMapping,
 } from "../../utils.js";
@@ -42,9 +42,14 @@ export default async function era(
       })
       .flat()
       .filter((resp) => resp !== undefined && Object.keys(resp).length);
-    const csvData = [...new Set(erasWithDups)].map(
+    const mappingData = [...new Set(erasWithDups)].map(
       (val, idx) => `${idx + 1},${val}`
     );
+
+    const csvData = [...new Set(erasWithDups)].map((val, idx) => ({
+      id: idx + 1,
+      era: val,
+    }));
 
     const philToEra = settled
       .map((res) => {
@@ -66,17 +71,20 @@ export default async function era(
 
     await createMapping(
       philToEra,
-      join(cwd(), "/src/generated/philId_to_era.js")
+      join(cwd(), "/src/generated/philId_to_era.js"),
+      "philIdToEra"
     );
     await createMapping(
       [...new Set(eraToEra)].join(","),
-      join(cwd(), "src/generated/era_to_era.js")
+      join(cwd(), "src/generated/era_to_era.js"),
+      "eraToEra"
     );
     await createMapping(
-      createEntityToIdData(csvData),
-      join(cwd(), "/src/generated/era_to_id.js")
+      createEntityToIdData(mappingData),
+      join(cwd(), "/src/generated/era_to_id.js"),
+      "eraToId"
     );
-    await createCsv(csvData.join("\n"), "era.csv", "id,era");
+    await createSeedFile(JSON.stringify(csvData), "prisma/seeds/era.js", "era");
 
     return true;
   } catch (err) {

@@ -1,15 +1,11 @@
-import { cwd } from "node:process";
-import { getFile } from "../utils.js";
-import { join } from "node:path";
-import { default as quoteIdtoEra } from "../generated/quoteID_to_era.js";
-import { default as eraToId } from "../generated/era_to_id.js";
-import { default as philIdToEra } from "../generated/philId_to_era.js";
+import { createSeedFile } from "../utils.js";
 
-async function createCsv(data: string, csvPath: string, csvHeaders: string) {
-  const file = await getFile(join(cwd(), csvPath), csvHeaders);
-  await file.appendFile(data);
-  await file.close();
-}
+//@ts-ignore
+const { quoteIdToEra } = await import("../generated/quoteID_to_era.js");
+//@ts-ignore
+const { eraToId } = await import("../generated/era_to_id.js");
+//@ts-ignore
+const { philIdToEra } = await import("../generated/philId_to_era.js");
 
 function createData(
   idToEntity: Map<number, string[]>,
@@ -36,15 +32,15 @@ function createBridge(
   csvHeaders: string
 ) {
   const data = createData(idToEntity, entityToId);
-  createCsv(data, csvPath, csvHeaders);
+  createSeedFile(data, csvPath, csvHeaders);
 }
 
 export default function createBridges() {
   createBridge(
     philIdToEra,
     eraToId,
-    "philosopherEra.csv",
-    "philosopherId,eraId"
+    "prisma/seeds/philosopherEra.js",
+    "philosopherEra"
   );
-  createBridge(quoteIdtoEra, eraToId, "quoteEra.csv", "quoteId,eraId");
+  createBridge(quoteIdToEra, eraToId, "prisma/seeds/quoteEra.js", "quoteEra");
 }

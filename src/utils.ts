@@ -53,38 +53,15 @@ export async function getLinks(): Promise<string[]> {
   return links;
 }
 
-/**
- * opens file at "path" if it exists
- * create if it doesn't exist
- * add csv headers if they don't exist
- */
-export async function getFile(
+export async function createMapping(
+  data: string,
   path: string,
-  headers: string
-): Promise<FileHandle> {
-  await rm(path, { force: true });
-
-  let file = await open(path, "a+");
-  const firstLine = (await file.readLines()[Symbol.asyncIterator]().next())
-    .value;
-
-  // if file has content, return as is
-  if (firstLine) {
-    file.close();
-    return open(path, "a");
-  }
-
-  // otherwise append header and return
-  file = await open(path, "a");
-  await file.appendFile(`${headers}\n`);
-  return file;
-}
-
-export async function createMapping(data: string, path: string) {
+  exportName: string
+) {
   try {
     await rm(path, { force: true });
 
-    const start = `export default new Map([`;
+    const start = `export const ${exportName} = new Map([`;
     const end = `]);`;
 
     let file = await open(path, "a");
@@ -235,13 +212,19 @@ export default class WorkerPool extends EventEmitter {
   }
 }
 
-export async function createCsv(data: string, path: string, headers: string) {
+export async function createSeedFile(
+  data: string,
+  path: string,
+  exportName: string
+) {
   try {
-    const csv = await getFile(join(cwd(), path), headers);
-    await csv.appendFile(data);
-    await csv.close();
+    await rm(path, { force: true });
+    const file = await open(path, "a");
+    const start = `export const ${exportName} =`;
+    await file.appendFile(`${start}${data};`);
+    await file.close();
   } catch {
-    throw new Error("unable to create csv");
+    throw new Error("unable to create file");
   }
 }
 

@@ -1,7 +1,6 @@
 import jsdom = require("jsdom");
 import { getEraAnchors, getMainTitle } from "../../utils.js";
 import { eraResult } from "./index.js";
-import phil_to_id from "../../generated/phil_to_id.js";
 
 const { JSDOM } = jsdom;
 
@@ -10,6 +9,8 @@ export async function getEraData(link: string): Promise<eraResult> {
   const duplicates = []; // for csv data
   let mappingData: eraResult["philToEra"];
   const eraToEra = [];
+  //@ts-ignore
+  const { philToId } = await import("../../generated/phil_to_id.js");
 
   try {
     const {
@@ -40,7 +41,7 @@ export async function getEraData(link: string): Promise<eraResult> {
   }
 
   if (name && eras.size) {
-    const philId = phil_to_id.get(name);
+    const philId = philToId.get(name);
     if (philId) {
       mappingData = [philId, [...eras]];
     }

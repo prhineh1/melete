@@ -1,6 +1,10 @@
 import { join } from "path";
 import { cwd } from "process";
-import WorkerPool, { Entity, createCsv, createMapping } from "../../utils.js";
+import WorkerPool, {
+  Entity,
+  createMapping,
+  createSeedFile,
+} from "../../utils.js";
 import { Quote } from "./task_processor_quote.js";
 
 export default async function quote(
@@ -32,7 +36,7 @@ export default async function quote(
       })
       .flat()
       .filter((resp) => resp)
-      .map((quote, idx) => ({ id: idx, ...quote }));
+      .map((quote, idx) => ({ id: idx + 1, ...quote }));
 
     const quoteIdtoEra = quotes
       .filter((quote) => quote.eras?.length)
@@ -41,14 +45,20 @@ export default async function quote(
 
     await createMapping(
       quoteIdtoEra,
-      join(cwd(), "/src/generated/quoteID_to_era.js")
+      join(cwd(), "/src/generated/quoteID_to_era.js"),
+      "quoteIdToEra"
     );
 
     const data = quotes
-      .map((quote) => `${quote.id},${quote.authorId},${quote.text}`)
-      .join("\n");
+      .filter((quote) => quote.id && quote.text)
+      .map((quote) => {
+        if (quote.authorId) {
+          return { id: quote.id, authorId: quote.authorId, text: quote.text };
+        }
+        return { id: quote.id, text: quote.text };
+      });
 
-    createCsv(data, "quote.csv", "id,authorId,text");
+    createSeedFile(JSON.stringify(data), "prisma/seeds/quote.js", "quote");
 
     return true;
   } catch (err) {

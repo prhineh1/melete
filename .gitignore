@@ -2,3 +2,5 @@ node_modules/
 .env
 dist/
 *.csv
+prisma/seeds
+src/generated
