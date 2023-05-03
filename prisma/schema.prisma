@@ -19,8 +19,8 @@ model Philosopher {
 
 model Quote {
   id       Int          @id
-  authorid Int?
-  author   Philosopher? @relation(fields: [authorid], references: [id])
+  authorId Int?
+  author   Philosopher? @relation(fields: [authorId], references: [id])
   text     String
   eras     QuoteEra[]
 }
@@ -33,19 +33,19 @@ model Era {
 }
 
 model PhilosopherEra {
-  philosopherid Int
-  eraid         Int
-  Philosopher   Philosopher @relation(fields: [philosopherid], references: [id])
-  Era           Era         @relation(fields: [eraid], references: [id])
+  philosopherId Int
+  eraId         Int
+  Philosopher   Philosopher @relation(fields: [philosopherId], references: [id])
+  Era           Era         @relation(fields: [eraId], references: [id])
 
-  @@id([philosopherid, eraid])
+  @@id([philosopherId, eraId])
 }
 
 model QuoteEra {
-  quoteid Int
-  eraid   Int
-  Quote   Quote @relation(fields: [quoteid], references: [id])
-  Era     Era   @relation(fields: [eraid], references: [id])
+  quoteId Int
+  eraId   Int
+  Quote   Quote @relation(fields: [quoteId], references: [id])
+  Era     Era   @relation(fields: [eraId], references: [id])
 
-  @@id([quoteid, eraid])
+  @@id([quoteId, eraId])
 }

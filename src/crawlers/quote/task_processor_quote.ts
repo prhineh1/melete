@@ -12,7 +12,7 @@ enum NodeName {
 
 export type Quote = {
   id?: number;
-  authorId?: number | null;
+  authorId?: number;
   text: string;
   eras?: string[];
 };
@@ -21,14 +21,18 @@ async function getEras(
   eraAnchors: NodeListOf<HTMLAnchorElement>
 ): Promise<Set<string>> {
   const eras = new Set<string>();
-  //@ts-ignore
-  const { eraToEra } = import("../../generated/era_to_era.js");
 
   for (const anchor of eraAnchors) {
-    const text = anchor.textContent?.trim().toLowerCase();
-    const era = eraToEra.get(text ?? "");
-    if (era) {
-      eras.add(era);
+    try {
+      const {
+        window: { document },
+      } = await JSDOM.fromURL(anchor.href);
+      const era = getMainTitle(document);
+      if (era) {
+        eras.add(era);
+      }
+    } catch {
+      continue;
     }
   }
 
@@ -59,7 +63,7 @@ async function parseWikipediaPage(
 async function parseWikiquotePage(link: string): Promise<Quote[]> {
   let doc: Document;
   //@ts-ignore
-  const { philToId } = import("../../generated/phil_to_id.js");
+  const { philToId } = await import("../../generated/phil_to_id.js");
 
   try {
     const {

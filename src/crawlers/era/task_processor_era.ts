@@ -8,7 +8,6 @@ export async function getEraData(link: string): Promise<eraResult> {
   let doc;
   const duplicates = []; // for csv data
   let mappingData: eraResult["philToEra"];
-  const eraToEra = [];
   //@ts-ignore
   const { philToId } = await import("../../generated/phil_to_id.js");
 
@@ -33,7 +32,6 @@ export async function getEraData(link: string): Promise<eraResult> {
       if (era) {
         duplicates.push(era);
         eras.add(era);
-        eraToEra.push(`["${hrefText}","${era}"]`);
       }
     } catch {
       return {} as eraResult;
@@ -50,7 +48,6 @@ export async function getEraData(link: string): Promise<eraResult> {
   const res = {
     era: duplicates,
     philToEra: mappingData,
-    eraToEra,
   };
 
   return res;

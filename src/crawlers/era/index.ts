@@ -10,7 +10,6 @@ import WorkerPool, {
 export type eraResult = {
   era: string[];
   philToEra?: [number, string[]];
-  eraToEra?: string[];
 };
 
 export default async function era(
@@ -60,24 +59,10 @@ export default async function era(
       .filter((res) => res !== undefined)
       .join(",");
 
-    const eraToEra = settled
-      .map((res) => {
-        if (res.status === "fulfilled") {
-          return res.value.eraToEra;
-        }
-      })
-      .flat()
-      .filter((res) => res);
-
     await createMapping(
       philToEra,
       join(cwd(), "/src/generated/philId_to_era.js"),
       "philIdToEra"
-    );
-    await createMapping(
-      [...new Set(eraToEra)].join(","),
-      join(cwd(), "src/generated/era_to_era.js"),
-      "eraToEra"
     );
     await createMapping(
       createEntityToIdData(mappingData),

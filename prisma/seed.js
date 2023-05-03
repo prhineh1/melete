@@ -18,15 +18,12 @@ await prisma.quote.createMany({
     data: quote
 })
 
-// const { philosopherEra } = await import("./seeds/philosopherEra");
-// const philosopherEraSeed = prisma.philosopherEra.createMany({
-//     data: philosopherEra
-// })
+const { philosopherEra } = await import("./seeds/philosopherEra.js");
+await prisma.philosopherEra.createMany({
+    data: philosopherEra
+})
 
-// path = dockerSeedPath + "quoteEra.csv";
-// const quoteEraSeed = prisma.$executeRawUnsafe(`
-//     COPY "QuoteEra"(quoteid, eraid)
-//     FROM '${path}'
-//     DELIMITER ','
-//     CSV HEADER;   
-// `)
+const { quoteEra } = await import("./seeds/quoteEra.js");
+await prisma.quoteEra.createMany({
+    data: quoteEra
+})

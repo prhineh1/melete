@@ -35,12 +35,16 @@ export default async function quote(
         }
       })
       .flat()
-      .filter((resp) => resp)
-      .map((quote, idx) => ({ id: idx + 1, ...quote }));
+      .filter((quote) => quote?.text)
+      .map((quote, idx) => {
+        return { id: idx + 1, ...quote };
+      });
 
     const quoteIdtoEra = quotes
       .filter((quote) => quote.eras?.length)
-      .map((quote) => `[${quote?.id},[${quote?.eras}]]`)
+      .map((quote) => {
+        return `[${quote?.id},[${quote?.eras}]]`;
+      })
       .join(",");
 
     await createMapping(
@@ -49,14 +53,12 @@ export default async function quote(
       "quoteIdToEra"
     );
 
-    const data = quotes
-      .filter((quote) => quote.id && quote.text)
-      .map((quote) => {
-        if (quote.authorId) {
-          return { id: quote.id, authorId: quote.authorId, text: quote.text };
-        }
-        return { id: quote.id, text: quote.text };
-      });
+    const data = quotes.map((quote) => {
+      if (quote.authorId) {
+        return { id: quote.id, authorId: quote.authorId, text: quote.text };
+      }
+      return { id: quote.id, text: quote.text };
+    });
 
     createSeedFile(JSON.stringify(data), "prisma/seeds/quote.js", "quote");
 
