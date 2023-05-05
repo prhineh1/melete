@@ -4,3 +4,4 @@ dist/
 *.csv
 prisma/seeds
 src/generated
+*.pem
