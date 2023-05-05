@@ -7,6 +7,8 @@ services:
       - db
     networks:
       - app-net
+    volumes:
+      - ./dist:/app/dist
   db:
     hostname: db
     env_file:
@@ -18,7 +20,6 @@ services:
       - app-net
     volumes:
       - philosophers:/var/lib/postgresql/data
-      - ./prisma/seeds:/media/seeds
     ports:
       - "5432:5432"
 

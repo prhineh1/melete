@@ -1,8 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
-const dockerSeedPath = "/media/seeds/"
-
 const { philosopher } = await import("./seeds/philosopher.js");
 await prisma.philosopher.createMany({
     data: philosopher 
