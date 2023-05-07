@@ -1,40 +1,40 @@
 -- CreateTable
 CREATE TABLE "Philosopher" (
-    "id" INTEGER NOT NULL,
-    "name" TEXT NOT NULL,
+    "id" INT4 NOT NULL,
+    "name" STRING NOT NULL,
 
     CONSTRAINT "Philosopher_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Quote" (
-    "id" INTEGER NOT NULL,
-    "authorId" INTEGER,
-    "text" TEXT NOT NULL,
+    "id" INT4 NOT NULL,
+    "authorId" INT4,
+    "text" STRING NOT NULL,
 
     CONSTRAINT "Quote_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Era" (
-    "id" INTEGER NOT NULL,
-    "era" TEXT NOT NULL,
+    "id" INT4 NOT NULL,
+    "era" STRING NOT NULL,
 
     CONSTRAINT "Era_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "PhilosopherEra" (
-    "philosopherId" INTEGER NOT NULL,
-    "eraId" INTEGER NOT NULL,
+    "philosopherId" INT4 NOT NULL,
+    "eraId" INT4 NOT NULL,
 
     CONSTRAINT "PhilosopherEra_pkey" PRIMARY KEY ("philosopherId","eraId")
 );
 
 -- CreateTable
 CREATE TABLE "QuoteEra" (
-    "quoteId" INTEGER NOT NULL,
-    "eraId" INTEGER NOT NULL,
+    "quoteId" INT4 NOT NULL,
+    "eraId" INT4 NOT NULL,
 
     CONSTRAINT "QuoteEra_pkey" PRIMARY KEY ("quoteId","eraId")
 );
