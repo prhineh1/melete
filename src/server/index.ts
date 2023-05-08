@@ -13,10 +13,12 @@ export type HttpResponseType = ServerResponse<IncomingMessage> & {
 };
 const prisma = new PrismaClient();
 
-const options = {
-  key: readFileSync("key.pem"),
-  cert: readFileSync("cert.pem"),
-};
+const options = process.env.ISPRODUCTION
+  ? {}
+  : {
+      key: readFileSync("key.pem"),
+      cert: readFileSync("cert.pem"),
+    };
 
 const protocol = process.env.ISPRODUCTION
   ? await import("http")
@@ -24,7 +26,7 @@ const protocol = process.env.ISPRODUCTION
 
 //@ts-ignore
 const server = protocol.createServer(
-  process.env.ISPRODUCTION ? {} : options,
+  options,
   (req: IncomingMessage, res: HttpResponseType) => {
     const url = new URL(req.url ?? "", `https://${req.headers.host}`);
     res.setHeader("Content-Type", "application/json");
