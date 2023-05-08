@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import { createServer } from "https";
+// import { createServer } from "https";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { ServerResponse, IncomingMessage } from "http";
 import { quotesAPI } from "./api/quote.js";
@@ -19,29 +19,37 @@ const options = {
   cert: readFileSync("cert.pem"),
 };
 
-const server = createServer(options, (req, res) => {
-  const url = new URL(req.url ?? "", `https://${req.headers.host}`);
-  res.setHeader("Content-Type", "application/json");
-  res.setHeader("Cache-Control", "public, max-age=604800");
+const protocol = process.env.ISPRODUCTION
+  ? await import("http")
+  : await import("https");
 
-  // only service "GET" requests
-  if (req.method !== "GET") {
-    res.writeHead(405);
-    res.end();
-    return;
-  }
+//@ts-ignore
+const server = protocol.createServer(
+  process.env.ISPRODUCTION ? {} : options,
+  (req: IncomingMessage, res: HttpResponseType) => {
+    const url = new URL(req.url ?? "", `https://${req.headers.host}`);
+    res.setHeader("Content-Type", "application/json");
+    res.setHeader("Cache-Control", "public, max-age=604800");
 
-  switch (url.pathname) {
-    case "/quotes":
-    case "/quotes/":
-      quotesAPI(url, res, prisma);
-      break;
-    default:
-      res.writeHead(404);
+    // only service "GET" requests
+    if (req.method !== "GET") {
+      res.writeHead(405);
       res.end();
-      break;
+      return;
+    }
+
+    switch (url.pathname) {
+      case "/quotes":
+      case "/quotes/":
+        quotesAPI(url, res, prisma);
+        break;
+      default:
+        res.writeHead(404);
+        res.end();
+        break;
+    }
   }
-});
+);
 
 server.listen(8080, () => {
   console.log("HTTPS server listening on port 8080");
