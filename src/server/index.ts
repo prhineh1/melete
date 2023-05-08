@@ -1,5 +1,4 @@
 import { readFileSync } from "fs";
-// import { createServer } from "https";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { ServerResponse, IncomingMessage } from "http";
 import { quotesAPI } from "./api/quote.js";
