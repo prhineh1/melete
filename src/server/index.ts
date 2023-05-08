@@ -22,6 +22,7 @@ const options = {
 const server = createServer(options, (req, res) => {
   const url = new URL(req.url ?? "", `https://${req.headers.host}`);
   res.setHeader("Content-Type", "application/json");
+  res.setHeader("Cache-Control", "public, max-age=604800");
 
   // only service "GET" requests
   if (req.method !== "GET") {
