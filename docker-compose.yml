@@ -2,7 +2,7 @@ services:
   api:
     build: 
       context: .
-      dockerfile: dockerfile
+      dockerfile: dev.dockerfile
     depends_on:
       - db
     networks:
@@ -11,19 +11,18 @@ services:
       - ./dist:/app/dist
     ports:
     - "8080:8080"
+    - "5555:5555"
   db:
     hostname: db
-    env_file:
-      - .env
-    image: postgres:15-alpine
-    environment:
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    image: cockroachdb/cockroach:latest
     networks:
       - app-net
     volumes:
-      - philosophers:/var/lib/postgresql/data
+      - philosophers:/cockroach/cockroach-data
     ports:
-      - "5432:5432"
+      - "2657:2657"
+      - "3000:3000"
+    command: start-single-node --insecure --http-addr=db:3000
 
 volumes:
   philosophers:

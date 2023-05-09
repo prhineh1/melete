@@ -12,5 +12,5 @@ primary_region = "iad"
   auto_stop_machines = true
   auto_start_machines = true
 
-[env]
-  ISPRODUCTION = true
+[build]
+  dockerfile = "prod.dockerfile"
