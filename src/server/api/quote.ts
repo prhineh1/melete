@@ -8,10 +8,11 @@ export async function quotesAPI(
   try {
     const authors = url.searchParams.getAll("author");
     const eras = url.searchParams.getAll("era");
-    const page = Number(url.searchParams.get("page") ?? 1);
+    const cursor = Number(url.searchParams.get("cursor"));
 
     const quotes = await prisma.quote.findMany({
       select: {
+        id: true,
         text: true,
         author: {
           select: {
@@ -29,7 +30,7 @@ export async function quotesAPI(
         },
       },
       where: {
-        AND: [
+        OR: [
           authors.length
             ? {
                 author: {
@@ -59,46 +60,17 @@ export async function quotesAPI(
         ],
       },
       take: 100,
-      skip: Number.isNaN(page) || page === 1 ? 0 : (page - 1) * 100,
-    });
-
-    const totalPages = await prisma.quote.count({
-      where: {
-        AND: [
-          authors.length
-            ? {
-                author: {
-                  OR: authors.map((author) => ({
-                    name: {
-                      contains: author.toLowerCase().trim(),
-                    },
-                  })),
-                },
-              }
-            : {},
-          eras.length
-            ? {
-                eras: {
-                  some: {
-                    Era: {
-                      OR: eras.map((era) => ({
-                        era: {
-                          contains: era.toLowerCase().trim(),
-                        },
-                      })),
-                    },
-                  },
-                },
-              }
-            : {},
-        ],
-      },
+      skip: 1,
+      cursor: cursor === 0 ? undefined : { id: cursor },
     });
 
     const quotesAndPages = {
-      pages: Math.ceil(totalPages / 100),
-      currentPage: page,
-      quotes: quotes,
+      cursor: quotes.length < 100 ? -1 : quotes[99].id,
+      quotes: quotes.map((quote) => ({
+        author: quote.author,
+        eras: quote.eras.map((obj) => obj.Era.era),
+        text: quote.text,
+      })),
     };
     res.writeHead(200);
     res.end(JSON.stringify(quotesAndPages));
