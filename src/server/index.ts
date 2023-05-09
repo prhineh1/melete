@@ -40,8 +40,7 @@ const server = protocol.createServer(
     }
 
     switch (url.pathname) {
-      case "/quotes":
-      case "/quotes/":
+      case "/api/quotes":
         quotesAPI(url, res, prisma);
         break;
       default:
