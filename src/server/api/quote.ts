@@ -29,36 +29,39 @@ export async function quotesAPI(
           },
         },
       },
-      where: {
-        OR: [
-          authors.length
-            ? {
-                author: {
-                  OR: authors.map((author) => ({
-                    name: {
-                      contains: author.toLowerCase().trim(),
-                    },
-                  })),
-                },
-              }
-            : {},
-          eras.length
-            ? {
-                eras: {
-                  some: {
-                    Era: {
-                      OR: eras.map((era) => ({
-                        era: {
-                          contains: era.toLowerCase().trim(),
+      where:
+        !authors.length && !eras.length
+          ? undefined
+          : {
+              OR: [
+                authors.length
+                  ? {
+                      author: {
+                        OR: authors.map((author) => ({
+                          name: {
+                            contains: author.toLowerCase().trim(),
+                          },
+                        })),
+                      },
+                    }
+                  : {},
+                eras.length
+                  ? {
+                      eras: {
+                        some: {
+                          Era: {
+                            OR: eras.map((era) => ({
+                              era: {
+                                contains: era.toLowerCase().trim(),
+                              },
+                            })),
+                          },
                         },
-                      })),
-                    },
-                  },
-                },
-              }
-            : {},
-        ],
-      },
+                      },
+                    }
+                  : {},
+              ],
+            },
       take: 100,
       skip: 1,
       cursor: cursor === 0 ? undefined : { id: cursor },
@@ -67,7 +70,7 @@ export async function quotesAPI(
     const quotesAndPages = {
       cursor: quotes.length < 100 ? -1 : quotes[99].id,
       quotes: quotes.map((quote) => ({
-        author: quote.author,
+        author: quote.author?.name ?? "unknown",
         eras: quote.eras.map((obj) => obj.Era.era),
         text: quote.text,
       })),

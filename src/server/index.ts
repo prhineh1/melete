@@ -27,15 +27,15 @@ const server = createServer((req, res) => {
   }
 
   switch (url.pathname) {
-    case "/api/quotes":
-      res.setHeader("Content-Type", "application/json");
-      res.setHeader("Cache-Control", "public, max-age=604800");
-      quotesAPI(url, res, prisma);
-      break;
-    case "/docs":
+    case "/":
       const file = readFileSync(join(cwd(), `static/index.html`));
       res.writeHead(200, { "Content-Type": "text/html" });
       res.end(file);
+      break;
+    case "/api/v1/quotes":
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("Cache-Control", "public, max-age=604800");
+      quotesAPI(url, res, prisma);
       break;
     default:
       if (url.pathname.search(/(\.css)$|(\.js(on)?)$/) > -1) {
