@@ -17,7 +17,7 @@
   },
   "servers": [
     {
-      "url": "https://melete.fly.dev/api",
+      "url": "https://meleteapi.dev/api/v1",
       "description": ""
     }
   ],
@@ -34,8 +34,8 @@
   "paths": {
     "/quotes": {
       "get": {
-        "summary": "Returns an array of quotes based on query params passed.",
-        "description": "\n* `author` and `era` query params can be set multiple times with different values in the same url (e.g., `?author=socrates&author=kant` or `?era=renaissance&era=mysticism`\n* queries are inclusive: `?author=aristotle&author=plato&era=contemporary%20philosophy` will return quotes from Aristotle, Plato, and contemporary philosophy\n* `author` and `era` query params will match the closest author (\"plat\" will match \"plato\") or era (\"contemp\" will match \"contemporary philosophy\")\n* 100 results max are shown. If the `cursor` property on the response body is greater than -1, it can be passed as a query param (also named `cursor`) to get the next set of results\n",
+        "summary": "Returns an array of quotes based on passed query params",
+        "description": "\n* `author` and `era` query params can be set multiple times with different values in the same url (e.g., `?author=socrates&author=kant` or `?era=renaissance&era=mysticism`\n* queries are inclusive: `?author=aristotle&author=plato&era=contemporary+philosophy` will return quotes from Aristotle, Plato, and contemporary philosophy\n* `author` and `era` query params will match the closest author (\"plat\" will match \"plato\") or era (\"contemp\" will match \"contemporary philosophy\")\n* 100 results max are shown. If the `cursor` property on the response body is greater than -1, it can be passed as a query param (also named `cursor`) to get the next set of results\n* requesting just `/quotes` without any query params will return the first set of results from all quotes, which can then be paged through with `cursor`\n",
         "operationId": "getquotes",
         "tags": [
           "Quotes"
@@ -47,6 +47,14 @@
             "description": "query quotes from this author",
             "schema": {
               "type": "string"
+            },
+            "examples": {
+              "plato": {
+                "value": "plato"
+              },
+              "confucius": {
+                "value": "confucius"
+              }
             }
           },
           {
@@ -55,6 +63,14 @@
             "description": "query quotes from this era of philosophy",
             "schema": {
               "type": "string"
+            },
+            "examples": {
+              "contemporary philosophy": {
+                "value": "contemporary philosophy"
+              },
+              "islamic golden age": {
+                "value": "islamic golden age"
+              }
             }
           },
           {
@@ -71,6 +87,15 @@
         "responses": {
           "200": {
             "description": "success",
+            "headers": {
+              "Cache-Control": {
+                "description": "results are cached for one week",
+                "schema": {
+                  "type": "string",
+                  "default": "public, max-age=604800"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -78,8 +103,7 @@
                   "properties": {
                     "cursor": {
                       "type": "number",
-                      "description": "used for querying next set of results; if value is -1, there are no more results to query",
-                      "default": 1
+                      "description": "used for querying next set of results; if value is -1, there are no more results to query"
                     },
                     "quotes": {
                       "type": "array",
