@@ -2,7 +2,7 @@ services:
   api:
     build: 
       context: .
-      dockerfile: dockerfile
+      dockerfile: dev.dockerfile
     depends_on:
       - db
     networks:
