@@ -16,11 +16,11 @@ export async function quotesAPI(
     if (url.pathname.includes("random")) {
       ret = await getRandomQuote(prisma);
     } else {
+      res.setHeader("Cache-Control", "public, max-age=604800");
       ret = await getQuotes(url, prisma);
     }
 
     res.setHeader("Content-Type", "application/json");
-    res.setHeader("Cache-Control", "public, max-age=604800");
     res.writeHead(200);
     res.end(JSON.stringify(ret));
   } catch {
