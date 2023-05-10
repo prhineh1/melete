@@ -1,0 +1,201 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "melete",
+    "description": "API for retrieving data about philosophers.",
+    "termsOfService": "",
+    "contact": {},
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.0.0"
+  },
+  "externalDocs": {
+    "description": "",
+    "url": ""
+  },
+  "servers": [
+    {
+      "url": "https://melete.fly.dev/api",
+      "description": ""
+    }
+  ],
+  "tags": [
+    {
+      "name": "Quotes",
+      "description": "Query quotes by philosopher and era",
+      "externalDocs": {
+        "description": "",
+        "url": ""
+      }
+    }
+  ],
+  "paths": {
+    "/quotes": {
+      "get": {
+        "summary": "Returns an array of quotes",
+        "description": "\n* `author` and `era` query params can be set multiple times with different values in the same url (e.g., `?author=socrates&author=kant` or `?era=renaissance&era=mysticism`\n* queries are inclusive: `?author=aristotle&author=plato&era=contemporary%20philosophy` will return quotes from Aristotle, Plato, and contemporary philosophy\n* `author` and `era` query params will match the closest author (\"plat\" will match \"plato\") or era (\"contemp\" will match \"contemporary philosophy\")\n* 100 results max are shown. If the `cursor` property on the response body is greater than -1, it can be passed as a query param (also named `cursor`) to get the next set of results\n",
+        "operationId": "getquotes",
+        "tags": [
+          "Quotes"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "author",
+            "description": "query quotes from this author",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "era",
+            "description": "query quotes from this era of philosophy",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "description": "query the next set of results",
+            "schema": {
+              "type": "number",
+              "exclusiveMinimum": true,
+              "minimum": -1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "headers": {
+              "Cache-Control": {
+                "description": "results are cached for one week",
+                "schema": {
+                  "type": "string",
+                  "default": "public, max-age=604800"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "cursor": {
+                      "type": "number",
+                      "description": "used for querying next set of results; if value is -1, there are no more results to query",
+                      "default": 1
+                    },
+                    "quotes": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Quote"
+                      },
+                      "description": "array of quotes"
+                    }
+                  }
+                },
+                "examples": {
+                  "example": {
+                    "value": {
+                      "cursor": 400,
+                      "quotes": [
+                        {
+                          "text": "My lectures are published and not published; they will be intelligible to those who heard them, and to none beside.",
+                          "author": "Aristotle",
+                          "eras": [
+                            "ancient greek philosophy"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {},
+            "description": "server error",
+            "headers": {}
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Quote": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "quote text"
+          },
+          "author": {
+            "type": "string",
+            "description": "quote author"
+          },
+          "eras": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "",
+              "enum": [
+                "contemporary philosophy",
+                "medieval philosophy",
+                "hellenistic philosophy",
+                "pre-socratic philosophy",
+                "ancient philosophy",
+                "ancient greek philosophy",
+                "reformation",
+                "17th century in philosophy",
+                "19th-century philosophy",
+                "islamic golden age",
+                "abbasid dynasty",
+                "18th century in philosophy",
+                "age of enlightenment",
+                "renaissance philosophy",
+                "early modern philosophy",
+                "modern philosophy",
+                "western philosophy",
+                "renaissance",
+                "neo-confucianism",
+                "hundred schools of thought",
+                "16th century in philosophy",
+                "edo period",
+                "british raj",
+                "church fathers",
+                "classical greece",
+                "zhou dynasty",
+                "12th century in philosophy",
+                "13th century in philosophy",
+                "high middle ages",
+                "crisis of the late middle ages",
+                "hindus",
+                "indian philosophy",
+                "patristics",
+                "14th century in philosophy",
+                "second scholasticism",
+                "byzantine philosophy",
+                "mysticism",
+                "late antiquity",
+                "qing dynasty",
+                "islamic calendar",
+                "song dynasty"
+              ]
+            },
+            "description": "eras the quote belongs to",
+            "uniqueItems": true
+          }
+        }
+      }
+    },
+    "securitySchemes": {},
+    "parameters": {}
+  }
+}
