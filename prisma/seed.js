@@ -1,5 +1,11 @@
 import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+    datasources: {
+        db: {
+            url: process.env.DIRECT_URL
+        }
+    }
+});
 
 const { philosopher } = await import("./seeds/philosopher.js");
 await prisma.philosopher.createMany({

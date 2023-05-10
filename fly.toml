@@ -11,6 +11,3 @@ primary_region = "iad"
   force_https = true
   auto_stop_machines = true
   auto_start_machines = true
-
-[build]
-  dockerfile = "prod.dockerfile"

@@ -5,4 +5,4 @@ dist/
 prisma/seeds
 src/generated
 *.pem
-.DS_Store
+*.DS_Store
