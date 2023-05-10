@@ -33,8 +33,7 @@ const server = createServer((req, res) => {
       res.end(file);
       break;
     case "/api/v1/quotes":
-      res.setHeader("Content-Type", "application/json");
-      res.setHeader("Cache-Control", "public, max-age=604800");
+    case "/api/v1/quotes/random":
       quotesAPI(url, res, prisma);
       break;
     default:
