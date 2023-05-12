@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "melete",
-    "description": "Melete is a philosophy database created by scraping Wikipedia and its accompanying api. \n\nDocumentation and demoing of the api is available below. \n\nIf you'd like to explore the data yourself [this link will download the postgres sql dump](https://meleteapi.dev/static/melete_sql_dump.gz).\n\nInterested in contributing? Visit the [github page](https://github.com/prhineh1/melete) for guidance.",
+    "description": "Melete is a philosophy database created by scraping Wikipedia and its accompanying api. \n\nDocumentation and demoing of the api is available below. \n\nIf you'd like to explore the data yourself [this link will download the postgres sql dump](/static/melete_sql_dump.gz).\n\nInterested in contributing? Visit the [github page](https://github.com/prhineh1/melete) for guidance.",
     "termsOfService": "",
     "contact": {
       "email": "prhineh1@meleteapi.dev"
