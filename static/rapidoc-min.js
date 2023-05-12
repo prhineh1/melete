@@ -1082,7 +1082,6 @@ pre[class*="language-"] {
 }
 #api-info span:first-child:before {
   content: "";
-  width: 0px;
 }
 `,nt=c`
 
