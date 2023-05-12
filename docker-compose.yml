@@ -10,6 +10,8 @@ services:
     volumes:
       - ./dist:/app/dist
       - ./static:/app/static
+      - ./src/generated:/app/src/generated
+      - ./prisma/seeds:/app/prisma/seeds
     ports:
     - "8080:8080"
     - "5555:5555"

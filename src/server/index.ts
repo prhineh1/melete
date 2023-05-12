@@ -1,10 +1,7 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import { ServerResponse, IncomingMessage, createServer } from "http";
 import { quotesAPI } from "./api/quote.js";
-import { serveStatic } from "./serveStatic.js";
-import { join } from "path";
-import { readFileSync } from "fs";
-import { cwd } from "process";
+import { serveStatic } from "./utils.js";
 
 export type PrismaType = PrismaClient<
   Prisma.PrismaClientOptions,
@@ -19,30 +16,37 @@ const prisma = new PrismaClient();
 const server = createServer((req, res) => {
   const url = new URL(req.url ?? "", `https://${req.headers.host}`);
 
+  // set general headers
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; font-src fonts.gstatic.com; style-src 'unsafe-inline'"
+  );
+  res.setHeader("Date", new Date().toUTCString());
+
   // only service "GET" requests
   if (req.method !== "GET") {
-    res.writeHead(405);
+    res.writeHead(405, { Allow: "GET" });
     res.end();
     return;
   }
 
-  switch (url.pathname) {
-    case "/":
-      const file = readFileSync(join(cwd(), `static/index.html`));
-      res.writeHead(200, { "Content-Type": "text/html" });
-      res.end(file);
-      break;
-    case "/api/v1/quotes":
-    case "/api/v1/quotes/random":
-      quotesAPI(url, res, prisma);
-      break;
+  switch (true) {
+    // root and static content
+    case /\/(static\/.+\.(js(on)?|css|html|sql))?$/.test(url.pathname):
+      serveStatic(url, req, res);
+      return;
+
+    // v1 quotes api
+    case /\/api\/v1\/quotes(\/random)?$/.test(url.pathname):
+      quotesAPI(url, req, res, prisma);
+      return;
+
+    // 404
     default:
-      if (url.pathname.search(/(\.css)$|(\.js(on)?)$/) > -1) {
-        serveStatic(url, res);
-      }
       res.writeHead(404);
       res.end();
-      break;
+      return;
   }
 });
 

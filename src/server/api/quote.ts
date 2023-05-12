@@ -1,4 +1,6 @@
+import { IncomingMessage } from "http";
 import { PrismaType, HttpResponseType } from "../index.js";
+import { areHashesEqual, createObjectHash } from "../utils.js";
 
 type Quote = {
   author: string;
@@ -8,19 +10,39 @@ type Quote = {
 
 export async function quotesAPI(
   url: URL,
+  req: IncomingMessage,
   res: HttpResponseType,
   prisma: PrismaType
 ): Promise<void> {
   try {
     let ret;
+    let resHash = "";
+    // random quote
     if (url.pathname.includes("random")) {
       ret = await getRandomQuote(prisma);
+      res.setHeader("Cache-Control", "no-cache");
     } else {
-      res.setHeader("Cache-Control", "public, max-age=604800");
+      // quotes with query params
       ret = await getQuotes(url, prisma);
+
+      resHash = createObjectHash(ret);
+      res.setHeader("ETag", resHash);
+      res.setHeader(
+        "Cache-Control",
+        "public, max-age=604800, stale-while-revalidate=86400"
+      );
     }
 
     res.setHeader("Content-Type", "application/json");
+
+    const eTag = req.headers["if-none-match"];
+    // if eTags match send a 304
+    if (eTag && eTag === resHash) {
+      res.writeHead(304);
+      res.end();
+      return;
+    }
+
     res.writeHead(200);
     res.end(JSON.stringify(ret));
   } catch {

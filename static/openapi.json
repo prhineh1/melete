@@ -2,12 +2,14 @@
   "openapi": "3.0.3",
   "info": {
     "title": "melete",
-    "description": "API for retrieving data about philosophers.",
+    "description": "Melete is a philosophy database created by scraping Wikipedia and its accompanying api. \n\nDocumentation and demoing of the api is available below. \n\nIf you'd like to explore the data yourself [this link will download the postgres sql dump](https://meleteapi.dev/static/melete_sql_dump.gz).\n\nInterested in contributing? Visit the [github page](https://github.com/prhineh1/melete) for guidance.",
     "termsOfService": "",
-    "contact": {},
+    "contact": {
+      "email": "prhineh1@meleteapi.dev"
+    },
     "license": {
-      "name": "Apache 2.0",
-      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+      "name": "GNU GPL-3.0",
+      "url": "https://www.gnu.org/licenses/gpl-3.0.html"
     },
     "version": "1.0.0"
   },
@@ -87,15 +89,6 @@
         "responses": {
           "200": {
             "description": "success",
-            "headers": {
-              "Cache-Control": {
-                "description": "results are cached for one week",
-                "schema": {
-                  "type": "string",
-                  "default": "public, max-age=604800"
-                }
-              }
-            },
             "content": {
               "application/json": {
                 "schema": {
