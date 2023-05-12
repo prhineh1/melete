@@ -33,7 +33,7 @@ const server = createServer((req, res) => {
 
   switch (true) {
     // root and static content
-    case /\/(static\/.+\.(js(on)?|css|html|sql))?$/.test(url.pathname):
+    case /\/(static\/.+\.(js(on)?|css|html|sql|gz))?$/.test(url.pathname):
       serveStatic(url, req, res);
       return;
 
