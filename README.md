@@ -1,5 +1,6 @@
 # melete
-Melete is an api that allows you to query data about philosophy that's been scraped from Wikipedia.
+Melete is an api that allows you to query data related to philosophy that has been scraped from Wikipedia.
+API documentation and demos available at https://meleteapi.dev
 
 ## Getting Started
 - install [docker](https://www.docker.com/products/docker-desktop/) for your platform
