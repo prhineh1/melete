@@ -82,6 +82,8 @@ async function getQuotes(
       !authors.length && !eras.length
         ? undefined
         : {
+            // see https://www.prisma.io/docs/concepts/components/prisma-client/null-and-undefined#the-effect-of-null-and-undefined-on-conditionals
+            // for discussion of how "OR" operator works
             OR: [
               authors.length
                 ? {

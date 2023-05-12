@@ -5,7 +5,6 @@ import era from "./era/index.js";
 import quote from "./quote/index.js";
 import createBridges from "../bridges/index.js";
 
-console.time("quick");
 const pool = new WorkerPool(
   os.availableParallelism(),
   "crawlers/task_processor.js"
@@ -15,18 +14,15 @@ const pool = new WorkerPool(
 const links = await getLinks();
 
 const philosopherFinished = await philosopher(links, pool, Entity.PHILOSOPHER);
-console.timeLog("quick");
+console.log("philosopher finished");
 
 if (philosopherFinished) {
   const eraFinished = await era(links, pool, Entity.ERA);
   console.log("era finished");
-  console.timeLog("quick");
   const quoteFinished = await quote(links, pool, Entity.QUOTE);
 
   if (eraFinished && quoteFinished) {
     pool.close();
     createBridges();
-    console.log("all done");
-    console.timeEnd("quick");
   }
 }

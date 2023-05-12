@@ -20,7 +20,7 @@ const server = createServer((req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Content-Security-Policy",
-    "default-src 'self'; font-src fonts.gstatic.com; style-src 'unsafe-inline'"
+    "default-src 'self'; font-src fonts.gstatic.com; style-src 'unsafe-inline'; connect-src *"
   );
   res.setHeader("Date", new Date().toUTCString());
 
