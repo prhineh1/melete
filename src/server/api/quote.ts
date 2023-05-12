@@ -1,6 +1,6 @@
 import { IncomingMessage } from "http";
 import { PrismaType, HttpResponseType } from "../index.js";
-import { areHashesEqual, createObjectHash } from "../utils.js";
+import { createObjectHash } from "../utils.js";
 
 type Quote = {
   author: string;
