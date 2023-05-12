@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "compile": "tsc",
     "watch": "tsc --watch",
-    "crawl": "node dist/crawlers/index.js"
+    "crawl": "node dist/crawlers/index.js",
+    "start": "node dist/server/index.js"
   },
   "type": "module",
   "keywords": [],

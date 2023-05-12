@@ -17,6 +17,7 @@ export async function quotesAPI(
   try {
     let ret;
     let resHash = "";
+
     // random quote
     if (url.pathname.includes("random")) {
       ret = await getRandomQuote(prisma);
