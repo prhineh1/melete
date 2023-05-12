@@ -5,7 +5,7 @@ import WorkerPool, {
   createSeedFile,
   createEntityToIdData,
   createMapping,
-} from "../../utils.js";
+} from "../utils.js";
 
 export type eraResult = {
   era: string[];

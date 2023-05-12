@@ -1,11 +1,6 @@
-import { createSeedFile } from "../utils.js";
-
-//@ts-ignore
-const { quoteIdToEra } = await import("../generated/quoteID_to_era.js");
-//@ts-ignore
-const { eraToId } = await import("../generated/era_to_id.js");
-//@ts-ignore
-const { philIdToEra } = await import("../generated/philId_to_era.js");
+import { cwd } from "process";
+import { join } from "path";
+import { createSeedFile } from "../crawlers/utils.js";
 
 function createData(
   idToEntity: Map<number, string[]>,
@@ -38,7 +33,18 @@ function createBridge(
   createSeedFile(data, csvPath, csvHeaders);
 }
 
-export default function createBridges() {
+export default async function createBridges() {
+  //@ts-ignore
+  const { quoteIdToEra } = await import(
+    join(cwd(), "src/generated/quoteID_to_era.js")
+  );
+  //@ts-ignore
+  const { eraToId } = await import(join(cwd(), "src/generated/era_to_id.js"));
+  //@ts-ignore
+  const { philIdToEra } = await import(
+    join(cwd(), "src/generated/philId_to_era.js")
+  );
+
   createBridge(
     philIdToEra,
     eraToId,

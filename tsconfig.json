@@ -13,9 +13,12 @@
   "exclude": [
     "node_modules",
     "dist",
-    "prisma"
+    "prisma",
+    "src/generated"
   ],
   "include": [
-    "src/**/*"
+    "src/bridges/*",
+    "src/crawlers/*",
+    "src/server/*"
   ]
 }

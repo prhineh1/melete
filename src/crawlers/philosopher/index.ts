@@ -3,7 +3,7 @@ import WorkerPool, {
   createSeedFile,
   createEntityToIdData,
   createMapping,
-} from "../../utils.js";
+} from "../utils.js";
 import { join } from "node:path";
 import { cwd } from "node:process";
 

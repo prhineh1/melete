@@ -1,5 +1,5 @@
 import { parentPort } from "worker_threads";
-import { Entity } from "../utils.js";
+import { Entity } from "./utils.js";
 import { getQuoteData } from "./quote/task_processor_quote.js";
 import { getPhilosopherData } from "./philosopher/task_processor_philosopher.js";
 import { getEraData } from "./era/task_processor_era.js";
