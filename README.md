@@ -10,15 +10,10 @@ API documentation and demos available at https://meleteapi.dev
 - start docker and run `docker compose up`
 
 ## Scripts
+You can run the following scripts in docker using [docker exec](https://docs.docker.com/engine/reference/commandline/exec/).
 
-- build the dockerfile `docker build -t melete-api -f dev.dockerfile .`
-- start the web crawler in a container:
-  ````
-  docker run \
-  --mount type=bind,source="$(pwd)"/src/generated,target=/app/src/generated \
-  --mount type=bind,source="$(pwd)"/prisma/seeds,target=/app/prisma/seeds \
-  melete-api npm run crawl
-  ````
-    - The web crawler is multi-threaded, so you may want to consider increasing the number of CPUs Docker has access to
-- `npx primsa migrate dev` creates the database and applies migrations
+- `npm run crawl` starts the web-crawler which generates seed files for the database
+  - The web crawler is multi-threaded, consider increasing the number of CPUs Docker has access to speed up the crawl
+- `npx primsa migrate deploy` creates the database and applies migrations
 - `npx prisma db seed` seeds the database with the content in `prisma/seeds`
+- `npm run watch` starts the typescript compiler in watch mode. The compiler's output folder is bound to its docker's counterpart.

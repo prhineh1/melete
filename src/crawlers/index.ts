@@ -21,5 +21,6 @@ if (philosopherFinished) {
   if (eraFinished && quoteFinished) {
     pool.close();
     createBridges();
+    console.log("crawl finished");
   }
 }

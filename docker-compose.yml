@@ -13,8 +13,12 @@ services:
       - ./src/generated:/app/src/generated
       - ./prisma/seeds:/app/prisma/seeds
     ports:
-    - "8080:8080"
-    - "5555:5555"
+      - "8080:8080" # node server
+      - "5555:5555" # prisma studio (npx prisma studio)
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/postgres
+      - DIRECT_URL=postgresql://postgres:password@db:5432/postgres
+      - SHADOW_DATABASE_URL=postgresql://postgres:password@db:5432/postgres
   db:
     hostname: db
     image: postgres:15-alpine
