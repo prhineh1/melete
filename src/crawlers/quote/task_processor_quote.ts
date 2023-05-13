@@ -1,6 +1,6 @@
 // see: https://www.typescriptlang.org/docs/handbook/esm-node.html for this syntax
 import jsdom = require("jsdom");
-import { getMainTitle, getEraAnchors } from "../../utils.js";
+import { getMainTitle, getEraAnchors } from "../utils.js";
 
 const { JSDOM } = jsdom;
 

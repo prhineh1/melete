@@ -1,14 +1,11 @@
-import WorkerPool, { Entity, getLinks } from "../utils.js";
+import WorkerPool, { Entity, getLinks } from "./utils.js";
 import os from "node:os";
 import philosopher from "./philosopher/index.js";
 import era from "./era/index.js";
 import quote from "./quote/index.js";
 import createBridges from "../bridges/index.js";
 
-const pool = new WorkerPool(
-  os.availableParallelism(),
-  "crawlers/task_processor.js"
-);
+const pool = new WorkerPool(os.availableParallelism(), "task_processor.js");
 
 // fetch wikipedia links
 const links = await getLinks();
@@ -24,5 +21,6 @@ if (philosopherFinished) {
   if (eraFinished && quoteFinished) {
     pool.close();
     createBridges();
+    console.log("crawl finished");
   }
 }

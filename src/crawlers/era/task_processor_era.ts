@@ -1,5 +1,5 @@
 import jsdom = require("jsdom");
-import { getEraAnchors, getMainTitle } from "../../utils.js";
+import { getEraAnchors, getMainTitle } from "../utils.js";
 import { eraResult } from "./index.js";
 
 const { JSDOM } = jsdom;

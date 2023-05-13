@@ -1,8 +1,7 @@
 node_modules/
-dist/
 *.csv
 .git
-src/generated
-prisma/seeds
+src/generated/*
+prisma/seeds/*
 .env
 .gitignore

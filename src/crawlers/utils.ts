@@ -2,9 +2,7 @@
 import jsdom = require("jsdom");
 import { AsyncResource } from "node:async_hooks";
 import EventEmitter from "node:events";
-import { FileHandle, open, rm } from "node:fs/promises";
-import { join } from "node:path";
-import { cwd } from "node:process";
+import { open, writeFile } from "node:fs/promises";
 import { Worker } from "node:worker_threads";
 
 const philosopherUrlsLists = [
@@ -59,15 +57,12 @@ export async function createMapping(
   exportName: string
 ) {
   try {
-    await rm(path, { force: true });
-
     const start = `export const ${exportName} = new Map([`;
     const end = `]);`;
 
-    let file = await open(path, "a");
-    file.appendFile(`${start}${data}${end}`);
-    file.close();
-  } catch {
+    await writeFile(path, `${start}${data}${end}`);
+  } catch (e) {
+    console.log(e);
     throw new Error("unable to create mapping between entities");
   }
 }
@@ -218,11 +213,8 @@ export async function createSeedFile(
   exportName: string
 ) {
   try {
-    await rm(path, { force: true });
-    const file = await open(path, "a");
     const start = `export const ${exportName} =`;
-    await file.appendFile(`${start}${data};`);
-    await file.close();
+    await writeFile(path, `${start}${data};`);
   } catch {
     throw new Error("unable to create file");
   }

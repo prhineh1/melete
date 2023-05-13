@@ -1,10 +1,6 @@
 import { join } from "path";
 import { cwd } from "process";
-import WorkerPool, {
-  Entity,
-  createMapping,
-  createSeedFile,
-} from "../../utils.js";
+import WorkerPool, { Entity, createMapping, createSeedFile } from "../utils.js";
 import { Quote } from "./task_processor_quote.js";
 
 export default async function quote(

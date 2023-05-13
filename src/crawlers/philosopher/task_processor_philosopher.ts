@@ -1,4 +1,4 @@
-import { getMainTitle } from "../../utils.js";
+import { getMainTitle } from "../utils.js";
 import jsdom = require("jsdom");
 
 const { JSDOM } = jsdom;
