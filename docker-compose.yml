@@ -8,9 +8,8 @@ services:
     networks:
       - app-net
     volumes:
-      - ./dist:/app/dist
       - ./static:/app/static
-      - ./src/generated:/app/src/generated
+      - ./src:/app/src
       - ./prisma/seeds:/app/prisma/seeds
     ports:
       - "8080:8080" # node server

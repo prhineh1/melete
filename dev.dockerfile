@@ -1,16 +1,16 @@
-FROM node:lts-alpine
-WORKDIR /app
+FROM node:lts-alpine as build
+WORKDIR /build
 COPY . .
-
-# install dependencies
 RUN npm ci
-
-# compile app
 RUN npm run compile
 
-# copy compiled code
-COPY ./dist ./dist/
-
+FROM node:lts-alpine
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY --from=build /build/dist ./dist
+COPY --from=build /build/prisma ./prisma
+COPY --from=build /build/tsconfig.json ./
 # generate frontend client for prisma
 RUN ./node_modules/.bin/prisma generate
 EXPOSE 8080

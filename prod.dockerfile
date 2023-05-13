@@ -1,17 +1,15 @@
-FROM node:lts-alpine
-WORKDIR /app
+FROM node:lts-alpine as build
+WORKDIR /build
 COPY . .
-
-# install dependencies
 RUN npm ci
-
-# compile app
 RUN npm run compile
 
-# copy compiled code
-COPY ./dist ./dist/
-
-# generate frontend client for prisma for data proxy
+FROM node:lts-alpine
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+COPY --from=build /build/dist ./dist
+COPY --from=build /build/prisma ./prisma
 RUN ./node_modules/.bin/prisma generate --data-proxy
 EXPOSE 8080
 CMD [ "node", "dist/server/index.js" ]

@@ -16,4 +16,4 @@ You can run the following scripts in docker using [docker exec](https://docs.doc
   - The web crawler is multi-threaded, consider increasing the number of CPUs Docker has access to speed up the crawl
 - `npx primsa migrate deploy` creates the database and applies migrations
 - `npx prisma db seed` seeds the database with the content in `prisma/seeds`
-- `npm run watch` starts the typescript compiler in watch mode. The compiler's output folder is bound to its docker's counterpart.
+- `npm run watch` starts the typescript compiler in watch mode. Any .ts file under src will be compiled
