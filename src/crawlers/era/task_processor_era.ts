@@ -26,7 +26,6 @@ export async function getEraData(link: string): Promise<eraResult> {
   const eras: Set<string> = new Set<string>();
   for (const anchor of eraAnchors) {
     try {
-      const hrefText = anchor.textContent?.trim().toLowerCase();
       const dom = await JSDOM.fromURL(anchor.href);
       const era = getMainTitle(dom.window.document);
       if (era) {
@@ -49,6 +48,7 @@ export async function getEraData(link: string): Promise<eraResult> {
     era: duplicates,
     philToEra: mappingData,
   };
+  console.log(`data for ${link}: ${res}`);
 
   return res;
 }

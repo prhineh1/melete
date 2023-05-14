@@ -147,5 +147,11 @@ async function getRandomQuote(prisma: PrismaType): Promise<Quote> {
     eras: Array.isArray(ret.era) ? ret.era : ret.era ? [ret.era] : [],
   };
 
-  return quote;
+  const randomQuotes = await prisma.randomquote.findMany();
+
+  return {
+    author: randomQuotes[0].name ?? "unknown",
+    text: randomQuotes[0].text,
+    eras: randomQuotes.map((quote) => quote.era ?? ""),
+  };
 }

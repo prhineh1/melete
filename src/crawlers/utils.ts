@@ -2,7 +2,7 @@
 import jsdom = require("jsdom");
 import { AsyncResource } from "node:async_hooks";
 import EventEmitter from "node:events";
-import { open, writeFile } from "node:fs/promises";
+import { writeFile } from "node:fs/promises";
 import { Worker } from "node:worker_threads";
 
 const philosopherUrlsLists = [

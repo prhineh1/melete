@@ -7,9 +7,6 @@ const prisma = new PrismaClient({
     }
 });
 
-// extensions
-await prisma.$executeRaw`CREATE EXTENSION IF NOT EXISTS tsm_system_rows`;
-
 const { philosopher } = await import("./seeds/philosopher.js");
 await prisma.philosopher.createMany({
     data: philosopher 

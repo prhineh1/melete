@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
 }
 
 datasource db {
@@ -50,4 +51,10 @@ model QuoteEra {
   Era     Era   @relation(fields: [eraId], references: [id])
 
   @@id([quoteId, eraId])
+}
+
+view randomquote {
+  name String?
+  text String  @unique
+  era  String?
 }
