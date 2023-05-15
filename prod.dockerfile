@@ -6,7 +6,9 @@ RUN npm run compile
 
 FROM node:lts-alpine
 WORKDIR /app
-COPY package.json static prisma package-lock.json ./
+COPY package.json package-lock.json ./
+COPY static ./static/
+COPY prisma ./prisma/
 RUN npm ci --omit=dev
 COPY --from=build /build/dist ./dist
 RUN ./node_modules/.bin/prisma generate --data-proxy
