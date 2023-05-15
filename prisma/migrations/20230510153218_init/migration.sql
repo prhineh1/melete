@@ -53,3 +53,13 @@ ALTER TABLE "QuoteEra" ADD CONSTRAINT "QuoteEra_quoteId_fkey" FOREIGN KEY ("quot
 
 -- AddForeignKey
 ALTER TABLE "QuoteEra" ADD CONSTRAINT "QuoteEra_eraId_fkey" FOREIGN KEY ("eraId") REFERENCES "Era"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- CreateExtension
+CREATE EXTENSION IF NOT EXISTS tsm_system_rows;
+
+-- CreateView
+CREATE OR REPLACE VIEW randomquote AS 
+    SELECT q.text, p.name, e.era FROM "Quote" q TABLESAMPLE system_rows(1)
+      LEFT JOIN "Philosopher" p ON q."authorId"=p.id
+      LEFT JOIN "QuoteEra" qe on q.id=qe."quoteId"
+      LEFT JOIN "Era" e on qe."eraId"=e.id;
