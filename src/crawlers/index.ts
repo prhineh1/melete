@@ -17,18 +17,18 @@ statfs(join(cwd(), "/src/generated")).catch(async () => {
   await mkdir(join(cwd(), "/src/generated"));
 });
 
-const pool = new WorkerPool(os.availableParallelism(), "task_processor.js");
-
 // fetch wikipedia links
 const links = await getLinks();
 
-const philosopherFinished = await philosopher(links, pool, Entity.PHILOSOPHER);
+const pool = new WorkerPool(os.availableParallelism(), "task_processor.js");
+
+const filteredLinks = await philosopher(links, pool, Entity.PHILOSOPHER);
 console.log("philosopher finished");
 
-if (philosopherFinished) {
-  const eraFinished = await era(links, pool, Entity.ERA);
+if (filteredLinks.length) {
+  const eraFinished = await era(filteredLinks, pool, Entity.ERA);
   console.log("era finished");
-  const quoteFinished = await quote(links, pool, Entity.QUOTE);
+  const quoteFinished = await quote(filteredLinks, pool, Entity.QUOTE);
 
   if (eraFinished && quoteFinished) {
     pool.close();

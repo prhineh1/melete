@@ -14,52 +14,6 @@ const philosopherUrlsLists = [
 
 const { JSDOM } = jsdom;
 
-async function filterLinks(links: string[]): Promise<string[]> {
-  const filtered = [];
-
-  for (const link of links) {
-    // link doesn't have corresponding page
-    if (link.includes("redlink")) {
-      continue;
-    }
-
-    // only include philosophers who have an "era", "region", or
-    // "school or tradition" entry on their page
-    let dom: jsdom.JSDOM;
-    try {
-      dom = await JSDOM.fromURL(link);
-    } catch {
-      continue;
-    }
-
-    const [regionTh] = Array.from(
-      dom.window.document.querySelectorAll(
-        ".infobox.biography.vcard th.infobox-label"
-      )
-    ).filter((th) => th.textContent?.trim().toLocaleLowerCase() === "region");
-
-    const [eraTh] = Array.from(
-      dom.window.document.querySelectorAll(
-        ".infobox.biography.vcard th.infobox-label"
-      )
-    ).filter((th) => th.textContent?.trim().toLocaleLowerCase() === "era");
-
-    const [schoolTh] = Array.from(
-      dom.window.document.querySelectorAll(
-        ".infobox.biography.vcard th.infobox-label"
-      )
-    ).filter((th) =>
-      th.textContent?.trim().toLocaleLowerCase().includes("school")
-    );
-
-    if (regionTh || eraTh || schoolTh) {
-      filtered.push(link);
-    }
-  }
-
-  return filtered;
-}
-
 /**
  * collects links from alphabetical List of philosophers page
  */
@@ -82,8 +36,7 @@ async function collectLinks(url: string): Promise<string[]> {
         (a) => (a as HTMLAnchorElement).href
       );
 
-      const filtered = await filterLinks(rowLinks);
-      links = [...links, ...filtered];
+      links = [...links, ...rowLinks];
     }
     next = next.nextElementSibling;
   }
