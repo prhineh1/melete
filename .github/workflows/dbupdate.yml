@@ -1,0 +1,20 @@
+name: Melete DB update
+on: workflow_dispatch
+jobs:
+  db_update:
+    name: update DB tables
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "lts/*"
+      - run: npm ci
+      - run: npm run compile
+      - run: npm run crawl
+      - run: npm i -g prisma
+      - run: prisma migrate reset --force
+    env:
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SHADOW_DATABASE_URL: ${{ secrets.SHADOW_DATABASE_URL }}
