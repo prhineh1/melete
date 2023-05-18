@@ -48,7 +48,5 @@ export async function getEraData(link: string): Promise<eraResult> {
     era: duplicates,
     philToEra: mappingData,
   };
-  console.log(`data for ${link}: ${res}`);
-
   return res;
 }

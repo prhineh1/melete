@@ -32,9 +32,10 @@ async function collectLinks(url: string): Promise<string[]> {
       return links;
     }
     if (next.nodeName === "UL") {
-      let rowLinks = Array.from(next.querySelectorAll("li > a")).map(
+      const rowLinks = Array.from(next.querySelectorAll("li > a")).map(
         (a) => (a as HTMLAnchorElement).href
       );
+
       links = [...links, ...rowLinks];
     }
     next = next.nextElementSibling;
