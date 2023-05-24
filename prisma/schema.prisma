@@ -14,10 +14,17 @@ datasource db {
 }
 
 model Philosopher {
-  id     Int              @id
-  name   String
-  quotes Quote[]
-  eras   PhilosopherEra[]
+  id      Int                 @id
+  name    String
+  quotes  Quote[]
+  eras    PhilosopherEra[]
+  schools PhilosopherSchool[]
+}
+
+model School {
+  id           Int                 @id
+  name         String
+  philosophers PhilosopherSchool[]
 }
 
 model Quote {
@@ -33,6 +40,15 @@ model Era {
   era          String
   philosophers PhilosopherEra[]
   quotes       QuoteEra[]
+}
+
+model PhilosopherSchool {
+  philosopherId Int
+  schoolId      Int
+  Philosopher   Philosopher @relation(fields: [philosopherId], references: [id])
+  School        School      @relation(fields: [schoolId], references: [id])
+
+  @@id([philosopherId, schoolId])
 }
 
 model PhilosopherEra {

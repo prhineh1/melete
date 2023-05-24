@@ -37,14 +37,14 @@ export default async function philosopher(
           return res.value;
         }
       })
-      .filter((val) => val);
+      .filter((val): val is [Philosopher, string] => Boolean(val));
 
     const mappingData = fulfilled.map(
-      (val, idx) => `${idx + 1},${val?.[0].name}`
+      (val, idx) => `${idx + 1},${val[0].name}`
     );
     const csvData = fulfilled.map((val, idx) => ({
       id: idx + 1,
-      name: val?.[0].name,
+      name: val[0].name,
     }));
     const filteredLinks = fulfilled.map((val) => val?.[1]!);
 
