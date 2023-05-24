@@ -1,5 +1,5 @@
 import jsdom = require("jsdom");
-import { getEraAnchors, getMainTitle } from "../utils.js";
+import { getInfoboxAnchors, getMainTitle } from "../utils.js";
 import { eraResult } from "./index.js";
 
 const { JSDOM } = jsdom;
@@ -21,7 +21,7 @@ export async function getEraData(link: string): Promise<eraResult> {
   }
 
   let name = getMainTitle(doc);
-  const eraAnchors = getEraAnchors(doc);
+  const eraAnchors = getInfoboxAnchors(doc, ["era"]);
 
   const eras: Set<string> = new Set<string>();
   for (const anchor of eraAnchors) {

@@ -14,7 +14,7 @@ export default async function philosopher(
   entity: Entity
 ): Promise<string[]> {
   try {
-    console.log("Creating philosopher.csv and related items...");
+    console.log("Creating philosopher seed file and related items...");
 
     const unfullfilled: Promise<[Philosopher, string] | null>[] = links.map(
       (link) => {

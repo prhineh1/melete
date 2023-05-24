@@ -44,6 +44,14 @@ export default async function createBridges() {
   const { philIdToEra } = await import(
     join(cwd(), "src/generated/philId_to_era.js")
   );
+  //@ts-ignore
+  const { schoolToId } = await import(
+    join(cwd(), "src/generated/school_to_id.js")
+  );
+  //@ts-ignore
+  const { philIdToSchool } = await import(
+    join(cwd(), "src/generated/philId_to_school.js")
+  );
 
   createBridge(
     philIdToEra,
@@ -56,4 +64,12 @@ export default async function createBridges() {
     "quoteId",
     "eraId",
   ]);
+
+  createBridge(
+    philIdToSchool,
+    schoolToId,
+    "prisma/seeds/philosopherSchool.js",
+    "philosopherSchool",
+    ["philosopherId", "schoolId"]
+  );
 }

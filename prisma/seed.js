@@ -31,3 +31,8 @@ const { quoteEra } = await import("./seeds/quoteEra.js");
 await prisma.quoteEra.createMany({
     data: quoteEra
 })
+
+const { philosopherSchool } = await import("./seeds/philosopherSchool.js");
+await prisma.philosopherSchool.createMany({
+    data: philosopherSchool
+})

@@ -88,10 +88,15 @@ export function createEntityToIdData(data: string[]): string {
   return str;
 }
 
-export function getEraAnchors(doc: Document): NodeListOf<HTMLAnchorElement> {
+export function getInfoboxAnchors(
+  doc: Document,
+  type: string[]
+): NodeListOf<HTMLAnchorElement> {
   const [eraTh] = Array.from(
     doc.querySelectorAll(".infobox.biography.vcard th.infobox-label")
-  ).filter((th) => th.textContent?.trim().toLocaleLowerCase() === "era");
+  ).filter((th) =>
+    type.some((t) => t === th.textContent?.trim().toLocaleLowerCase())
+  );
 
   return (
     (eraTh?.parentElement?.querySelectorAll(
@@ -225,4 +230,5 @@ export enum Entity {
   PHILOSOPHER = "philosopher",
   ERA = "era",
   QUOTE = "quote",
+  SCHOOL = "school",
 }

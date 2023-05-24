@@ -1,6 +1,6 @@
 // see: https://www.typescriptlang.org/docs/handbook/esm-node.html for this syntax
 import jsdom = require("jsdom");
-import { getMainTitle, getEraAnchors } from "../utils.js";
+import { getMainTitle, getInfoboxAnchors } from "../utils.js";
 
 const { JSDOM } = jsdom;
 
@@ -55,7 +55,7 @@ async function parseWikipediaPage(
   }
 
   const name = getMainTitle(doc);
-  const eraAnchors = getEraAnchors(doc);
+  const eraAnchors = getInfoboxAnchors(doc, ["era"]);
 
   return [name, await getEras(eraAnchors)];
 }

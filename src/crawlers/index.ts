@@ -3,6 +3,7 @@ import os from "node:os";
 import philosopher from "./philosopher/index.js";
 import era from "./era/index.js";
 import quote from "./quote/index.js";
+import school from "./school/index.js";
 import createBridges from "../bridges/index.js";
 import { mkdir, statfs } from "node:fs/promises";
 import { join } from "node:path";
@@ -26,6 +27,7 @@ const filteredLinks = await philosopher(links, pool, Entity.PHILOSOPHER);
 console.log("philosopher finished");
 
 if (filteredLinks.length) {
+  const schoolFinished = await school(filteredLinks, pool, Entity.SCHOOL);
   const eraFinished = await era(filteredLinks, pool, Entity.ERA);
   console.log("era finished");
   const quoteFinished = await quote(filteredLinks, pool, Entity.QUOTE);
