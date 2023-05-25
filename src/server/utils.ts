@@ -31,9 +31,8 @@ export async function serveStatic(
       // download for sql dump
       res.setHeader(
         "Content-Disposition",
-        'attachment; filename="melete_sql_dump_2023-05-18.gz"'
+        'attachment; filename="melete_sql_dump_2023-05-24.gz"'
       );
-      res.setHeader("Content-Encoding", "gzip");
 
       // html file
     } else if (pathName.search(/\.html/) > -1) {
