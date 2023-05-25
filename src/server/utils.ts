@@ -31,7 +31,7 @@ export async function serveStatic(
       // download for sql dump
       res.setHeader(
         "Content-Disposition",
-        'attachment; filename="melete_sql_dump.gz"'
+        'attachment; filename="melete_sql_dump_2023-05-18.gz"'
       );
       res.setHeader("Content-Encoding", "gzip");
 
