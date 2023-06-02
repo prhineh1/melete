@@ -1,5 +1,5 @@
 import { getMainTitle } from "../utils.js";
-import jsdom = require("jsdom");
+import * as jsdom from "jsdom";
 
 const { JSDOM } = jsdom;
 

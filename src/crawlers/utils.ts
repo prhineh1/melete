@@ -1,5 +1,4 @@
-// see: https://www.typescriptlang.org/docs/handbook/esm-node.html for this syntax
-import jsdom = require("jsdom");
+import * as jsdom from "jsdom";
 import { AsyncResource } from "node:async_hooks";
 import EventEmitter from "node:events";
 import { writeFile } from "node:fs/promises";

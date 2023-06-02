@@ -1,6 +1,6 @@
-import { IncomingMessage } from "http";
-import { PrismaType, HttpResponseType } from "../index.js";
+import { IncomingMessage, ServerResponse } from "http";
 import { createObjectHash } from "../utils.js";
+import { PrismaType, ResponseType } from "../index.js";
 
 type Quote = {
   author: string;
@@ -11,7 +11,7 @@ type Quote = {
 export async function quotesAPI(
   url: URL,
   req: IncomingMessage,
-  res: HttpResponseType,
+  res: ResponseType,
   prisma: PrismaType
 ): Promise<void> {
   try {

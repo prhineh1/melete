@@ -1,4 +1,4 @@
-import jsdom = require("jsdom");
+import * as jsdom from "jsdom";
 import { getInfoboxAnchors, getMainTitle } from "../utils.js";
 import { eraResult } from "./index.js";
 

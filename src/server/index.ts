@@ -1,17 +1,13 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { ServerResponse, IncomingMessage, createServer } from "http";
 import { quotesAPI } from "./api/quote.js";
 import { serveStatic } from "./utils.js";
 
-export type PrismaType = PrismaClient<
-  Prisma.PrismaClientOptions,
-  never,
-  Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined
->;
-export type HttpResponseType = ServerResponse<IncomingMessage> & {
+const prisma = new PrismaClient();
+export type PrismaType = typeof prisma;
+export type ResponseType = ServerResponse<IncomingMessage> & {
   req: IncomingMessage;
 };
-const prisma = new PrismaClient();
 
 const server = createServer((req, res) => {
   const url = new URL(req.url ?? "", `https://${req.headers.host}`);

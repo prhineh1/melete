@@ -9,7 +9,7 @@ export async function getSchoolData(link: string): Promise<schoolResult> {
   const duplicates: string[] = []; // for seed data
   let mappingData: schoolResult["philToSchool"];
   //@ts-ignore
-  const { philToId } = await import("../../generated/phil_to_id.js");
+  const { philToId } = await import("../../generated/phil_to_id.ts");
 
   try {
     const {
