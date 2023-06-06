@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { ServerResponse, IncomingMessage, createServer } from "http";
 import { quotesAPI } from "./api/quote.js";
+import { schoolsAPI } from "./api/school.js";
 import { serveStatic } from "./utils.js";
 
 const prisma = new PrismaClient();
@@ -36,6 +37,10 @@ const server = createServer((req, res) => {
     // v1 quotes api
     case /\/api\/v1\/quotes(\/random)?$/.test(url.pathname):
       quotesAPI(url, req, res, prisma);
+      return;
+
+    case /\api\v1\schools/.test(url.pathname):
+      schoolsAPI(req, res, prisma);
       return;
 
     // 404
