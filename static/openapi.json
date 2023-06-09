@@ -31,6 +31,14 @@
         "description": "",
         "url": ""
       }
+    },
+    {
+      "name": "Schools",
+      "description": "returns list of philosophical schools of thought",
+      "externalDocs": {
+        "description": "",
+        "url": ""
+      }
     }
   ],
   "paths": {
@@ -169,6 +177,52 @@
           }
         },
         "description": "Will return a different quote each time it's used."
+      }
+    },
+    "/Schools": {
+      "get": {
+        "summary": "Returns an array of schools of philosophy",
+        "description": "",
+        "operationId": "getSchools",
+        "tags": [
+          "Schools"
+        ],
+        "parameters": [],
+        "requestBody": {},
+        "responses": {
+          "200": {
+            "description": "An array of schools of philosophy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "name"
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ],
+                    "description": "School"
+                  },
+                  "description": "array of Schools"
+                },
+                "examples": {
+                  "example": {
+                    "value": "[{\"name\":\"existentialism\"}]"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "server error"
+          }
+        }
       }
     }
   },

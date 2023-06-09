@@ -99,7 +99,7 @@ export function getInfoboxAnchors(
 
   return (
     (eraTh?.parentElement?.querySelectorAll(
-      'a:not([href*="#"])'
+      'td a:not([href*="#"])'
     ) as NodeListOf<HTMLAnchorElement>) ?? []
   );
 }

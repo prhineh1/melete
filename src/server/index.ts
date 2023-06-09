@@ -39,7 +39,7 @@ const server = createServer((req, res) => {
       quotesAPI(url, req, res, prisma);
       return;
 
-    case /\api\v1\schools/.test(url.pathname):
+    case /\/api\/v1\/(schools)$/.test(url.pathname):
       schoolsAPI(req, res, prisma);
       return;
 

@@ -32,7 +32,7 @@ if (filteredLinks.length) {
   console.log("era finished");
   const quoteFinished = await quote(filteredLinks, pool, Entity.QUOTE);
 
-  if (eraFinished && quoteFinished) {
+  if (eraFinished && quoteFinished && schoolFinished) {
     pool.close();
     createBridges();
     console.log("crawl finished");

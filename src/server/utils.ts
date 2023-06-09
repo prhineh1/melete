@@ -1,14 +1,14 @@
 import { join } from "path";
 import { readFile, open, FileHandle } from "fs/promises";
 import { cwd } from "process";
-import { HttpResponseType } from "./index.js";
+import { ResponseType } from "./index.js";
 import { createHash } from "crypto";
 import { IncomingMessage } from "http";
 
 export async function serveStatic(
   url: URL,
   req: IncomingMessage,
-  res: HttpResponseType
+  res: ResponseType
 ) {
   try {
     const pathName = url.pathname === "/" ? "static/index.html" : url.pathname;
@@ -65,7 +65,7 @@ export async function serveStatic(
 
 async function createCacheHeaders(
   file: FileHandle,
-  res: HttpResponseType
+  res: ResponseType
 ): Promise<string> {
   const mTime = (await file.stat()).mtime;
 
