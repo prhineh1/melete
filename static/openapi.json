@@ -179,7 +179,7 @@
         "description": "Will return a different quote each time it's used."
       }
     },
-    "/Schools": {
+    "/schools": {
       "get": {
         "summary": "Returns an array of schools of philosophy",
         "description": "",
