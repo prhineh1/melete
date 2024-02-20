@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: melete
+  name: melete
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: melete
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: melete
+    spec:
+      containers:
+        - image: prhineh1/melete-api
+          name: melete-api
+          ports:
+            - containerPort: 8080
+          resources: {}
+status: {}
