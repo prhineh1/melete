@@ -2,24 +2,50 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: melete
-  name: melete
+    app: mongo-express
+  name: mongo-express
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: melete
+      app: mongo-express
   strategy: {}
   template:
     metadata:
       creationTimestamp: null
       labels:
-        app: melete
+        app: mongo-express
     spec:
       containers:
-        - image: prhineh1/melete-api
-          name: melete-api
+        - image: mongo-express
+          name: mongo-express
           ports:
-            - containerPort: 8080
-          resources: {}
-status: {}
+            - containerPort: 8081
+          env:
+            - name: ME_CONFIG_MONGODB_ADMINUSERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: mongo-root-username
+            - name: ME_CONFIG_MONGODB_ADMINPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: mongo-root-password
+            - name: ME_CONFIG_MONGODB_SERVER
+              valueFrom:
+                configMapKeyRef:
+                  name: mongo-configmap
+                  key: database_url
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-express-service
+spec:
+  selector:
+    app: mongo-express
+  ports:
+    - protocol: TCP
+      port: 8082
+      targetPort: 8081
