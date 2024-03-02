@@ -57,8 +57,8 @@ export async function serveStatic(
 
     res.writeHead(200);
     res.end(fileBuffer);
-  } catch {
-    res.writeHead(500);
+  } catch (e) {
+    res.writeHead(500, e as string);
     res.end();
   }
 }

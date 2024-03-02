@@ -35,8 +35,8 @@ export async function schoolsAPI(
 
     res.writeHead(200);
     res.end(JSON.stringify(ret));
-  } catch {
-    res.writeHead(500);
+  } catch (e) {
+    res.writeHead(500, e as string);
     res.end();
   }
 }
