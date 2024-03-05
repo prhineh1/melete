@@ -1,14 +1,14 @@
-import { IncomingMessage } from "http";
+import { IncomingMessage, get } from "http";
 import { createObjectHash } from "../utils.js";
 import { PrismaType, ResponseType } from "../index.js";
 
-type Quote = {
-  author: string;
+type Philosopher = {
+  name: string;
+  schools: string[];
   eras: string[];
-  text: string;
 };
 
-export async function quotesAPI(
+export async function philosophersAPI(
   url: URL,
   req: IncomingMessage,
   res: ResponseType,
@@ -18,21 +18,14 @@ export async function quotesAPI(
     let ret;
     let resHash = "";
 
-    // random quote
-    if (url.pathname.includes("random")) {
-      ret = await getRandomQuote(prisma);
-      res.setHeader("Cache-Control", "no-cache");
-    } else {
-      // quotes with query params
-      ret = await getQuotes(url, prisma);
+    ret = await getPhilosophers(url, prisma);
 
-      resHash = createObjectHash(ret);
-      res.setHeader("ETag", resHash);
-      res.setHeader(
-        "Cache-Control",
-        "public, max-age=604800, stale-while-revalidate=86400"
-      );
-    }
+    resHash = createObjectHash(ret);
+    res.setHeader("ETag", resHash);
+    res.setHeader(
+      "Cache-Control",
+      "public, max-age=604800, stale-while-revalidate=86400"
+    );
 
     res.setHeader("Content-Type", "application/json");
 
@@ -52,21 +45,26 @@ export async function quotesAPI(
   }
 }
 
-async function getQuotes(
+async function getPhilosophers(
   url: URL,
   prisma: PrismaType
-): Promise<{ cursor: number; quotes: Quote[] }> {
-  const authors = url.searchParams.getAll("author");
+): Promise<{ cursor: number; philosophers: Philosopher[] }> {
+  const names = url.searchParams.getAll("name");
   const eras = url.searchParams.getAll("era");
+  const schools = url.searchParams.getAll("school");
   const cursor = Number(url.searchParams.get("cursor"));
 
-  const quotes = await prisma.quote.findMany({
+  const philosophers = await prisma.philosopher.findMany({
     select: {
       id: true,
-      text: true,
-      author: {
+      name: true,
+      schools: {
         select: {
-          name: true,
+          School: {
+            select: {
+              name: true,
+            },
+          },
         },
       },
       eras: {
@@ -80,21 +78,19 @@ async function getQuotes(
       },
     },
     where:
-      !authors.length && !eras.length
+      !names.length && !eras.length && !schools.length
         ? undefined
         : {
             // see https://www.prisma.io/docs/concepts/components/prisma-client/null-and-undefined#the-effect-of-null-and-undefined-on-conditionals
             // for discussion of how "OR" operator works
             OR: [
-              authors.length
+              names.length
                 ? {
-                    author: {
-                      OR: authors.map((author) => ({
-                        name: {
-                          contains: author.toLowerCase().trim(),
-                        },
-                      })),
-                    },
+                    OR: names.map((name) => ({
+                      name: {
+                        contains: name.toLowerCase().trim(),
+                      },
+                    })),
                   }
                 : {},
               eras.length
@@ -112,6 +108,21 @@ async function getQuotes(
                     },
                   }
                 : {},
+              schools.length
+                ? {
+                    schools: {
+                      some: {
+                        School: {
+                          OR: schools.map((school) => ({
+                            name: {
+                              contains: school.toLowerCase().trim(),
+                            },
+                          })),
+                        },
+                      },
+                    },
+                  }
+                : {},
             ],
           },
     take: 100,
@@ -119,23 +130,12 @@ async function getQuotes(
     cursor: cursor === 0 ? undefined : { id: cursor },
   });
 
-  const quotesAndPages = {
-    cursor: quotes.length < 100 ? -1 : quotes[99].id,
-    quotes: quotes.map((quote) => ({
-      author: quote.author?.name ?? "unknown",
-      eras: quote.eras.map((obj) => obj.Era.era),
-      text: quote.text,
-    })),
-  };
-  return quotesAndPages;
-}
-
-async function getRandomQuote(prisma: PrismaType): Promise<Quote> {
-  const randomQuotes = await prisma.randomquote.findMany();
-
   return {
-    author: randomQuotes[0].name ?? "unknown",
-    text: randomQuotes[0].text,
-    eras: randomQuotes.map((quote) => quote.era ?? ""),
+    cursor: philosophers.length < 100 ? -1 : philosophers[99].id,
+    philosophers: philosophers.map((philosopher) => ({
+      name: philosopher.name ?? "unknown",
+      eras: philosopher.eras.map((obj) => obj.Era.era),
+      schools: philosopher.schools.map((obj) => obj.School.name),
+    })),
   };
 }
