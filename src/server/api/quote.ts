@@ -115,8 +115,8 @@ async function getQuotes(
             ],
           },
     take: 100,
-    skip: 1,
-    cursor: cursor === 0 ? undefined : { id: cursor },
+    skip: cursor < 1 ? 0 : 1,
+    cursor: cursor < 1 ? undefined : { id: cursor },
   });
 
   const quotesAndPages = {
