@@ -188,7 +188,6 @@
           "Schools"
         ],
         "parameters": [],
-        "requestBody": {},
         "responses": {
           "200": {
             "description": "An array of schools of philosophy",
@@ -221,6 +220,95 @@
           },
           "500": {
             "description": "server error"
+          }
+        }
+      }
+    },
+    "/philosophers": {
+      "get": {
+        "summary": "Retrieves a list of philosophers",
+        "description": "Returns philosophers with filters for name, era, and school. Supports pagination via cursor.",
+        "operationId": "getPhilosophers",
+        "tags": ["Philosophers"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "description": "Filter philosophers by name",
+            "schema": {
+              "type": "string"
+            },
+            "examples": {
+              "plato": {
+                "value": "plato"
+              },
+              "confucius": {
+                "value": "confucius"
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "era",
+            "description": "Filter philosophers by era",
+            "schema": {
+              "type": "string"
+            },
+            "examples": {
+              "contemporary philosophy": {
+                "value": "contemporary philosophy"
+              },
+              "islamic golden age": {
+                "value": "islamic golden age"
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "school",
+            "description": "Filter philosophers by school",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "description": "Cursor for pagination",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of philosophers matching criteria",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "cursor": {
+                      "type": "number",
+                      "description": "Cursor to be used for next page of results"
+                    },
+                    "philosophers": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Philosopher"
+                      },
+                      "description": "List of philosophers"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "No changes, cached version can be used"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         }
       }
@@ -292,7 +380,33 @@
             "uniqueItems": true
           }
         }
+      },
+      "Philosopher": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the philosopher"
+          },
+          "schools": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of philosophical schools the philosopher belongs to"
+          },
+          "eras": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Eras the philosopher is associated with"
+          }
+        },
+        "required": ["name", "schools", "eras"],
+        "description": "Represents a philosopher with their associated schools and eras"
       }
+      
     },
     "securitySchemes": {},
     "parameters": {}
