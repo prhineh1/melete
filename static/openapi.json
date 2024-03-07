@@ -39,6 +39,14 @@
         "description": "",
         "url": ""
       }
+    },
+      {
+        "name": "Philosophers",
+        "description": "returns list of philosophers and related details",
+        "externalDocs": {
+          "description": "",
+          "url": ""
+        }
     }
   ],
   "paths": {
