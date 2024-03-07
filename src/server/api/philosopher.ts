@@ -1,4 +1,4 @@
-import { IncomingMessage, get } from "http";
+import { IncomingMessage } from "http";
 import { createObjectHash } from "../utils.js";
 import { PrismaType, ResponseType } from "../index.js";
 
