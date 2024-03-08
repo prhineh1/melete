@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { ServerResponse, IncomingMessage, createServer } from "http";
 import { quotesAPI } from "./api/quote.js";
 import { schoolsAPI } from "./api/school.js";
+import { philosophersAPI } from "./api/philosopher.js";
 import { serveStatic } from "./utils.js";
 
 const prisma = new PrismaClient();
@@ -41,6 +42,10 @@ const server = createServer((req, res) => {
 
     case /\/api\/v1\/(schools)$/.test(url.pathname):
       schoolsAPI(req, res, prisma);
+      return;
+
+    case /\/api\/v1\/philosophers$/.test(url.pathname):
+      philosophersAPI(url, req, res, prisma);
       return;
 
     // 404

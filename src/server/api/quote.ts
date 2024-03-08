@@ -1,4 +1,4 @@
-import { IncomingMessage, ServerResponse } from "http";
+import { IncomingMessage } from "http";
 import { createObjectHash } from "../utils.js";
 import { PrismaType, ResponseType } from "../index.js";
 
@@ -115,8 +115,8 @@ async function getQuotes(
             ],
           },
     take: 100,
-    skip: 1,
-    cursor: cursor === 0 ? undefined : { id: cursor },
+    skip: cursor < 1 ? 0 : 1,
+    cursor: cursor < 1 ? undefined : { id: cursor },
   });
 
   const quotesAndPages = {
@@ -131,22 +131,6 @@ async function getQuotes(
 }
 
 async function getRandomQuote(prisma: PrismaType): Promise<Quote> {
-  const [ret] = (await prisma.$queryRaw`SELECT q.text, p.name, e.era
-      FROM "Quote" q TABLESAMPLE system_rows(1)
-      LEFT JOIN "Philosopher" p ON q."authorId"=p.id
-      LEFT JOIN "QuoteEra" qe on q.id=qe."quoteId"
-      LEFT JOIN "Era" e on qe."eraId"=e.id`) as {
-    text: string;
-    name: string | null;
-    era: string[] | string | null;
-  }[];
-
-  const quote: Quote = {
-    author: ret.name ?? "unknown",
-    text: ret.text,
-    eras: Array.isArray(ret.era) ? ret.era : ret.era ? [ret.era] : [],
-  };
-
   const randomQuotes = await prisma.randomquote.findMany();
 
   return {

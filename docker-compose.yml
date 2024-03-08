@@ -14,6 +14,7 @@ services:
     ports:
       - "8080:8080" # node server
       - "5555:5555" # prisma studio (npx prisma studio)
+      - "9229:9229" # node debugger
     environment:
       - DATABASE_URL=postgresql://postgres:password@db:5432/postgres
       - DIRECT_URL=postgresql://postgres:password@db:5432/postgres

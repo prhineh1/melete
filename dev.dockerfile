@@ -14,4 +14,4 @@ COPY --from=build /build/tsconfig.json ./
 # generate frontend client for prisma
 RUN ./node_modules/.bin/prisma generate
 EXPOSE 8080
-CMD [ "node", "dist/server/index.js" ]
+CMD [ "node", "--inspect=0.0.0.0", "dist/server/index.js" ]
