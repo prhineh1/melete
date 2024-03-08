@@ -2,7 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Melete",
-    "description": "Melete is an api that allows you to query data related to philosophy that has been scraped from Wikipedia.\n\nDocumentation and demoing of the api is available below. \n\nIf you'd like to explore the data yourself [this link will download the postgres sql dump](/static/melete_sql_dump_2023-05-24.gz).\n\nInterested in contributing? Visit the [github page](https://github.com/prhineh1/melete) for guidance.",
+    "version": "1.0.2",
+    "description": "Melete is an api that allows you to query data related to philosophy that has been scraped from Wikipedia.\n\nDocumentation and demoing of the api is available below. \n\nIf you'd like to explore the data yourself [this link will download the postgres sql dump](/static/melete_sql_dump_2023-05-24.gz).\n\nInterested in contributing? Visit the [github page](https://github.com/prhineh1/melete) for guidance.\n\n\n* Most query params, with the exception of `cursor`, can be set multiple times with different values in the same url (e.g., `?author=socrates&author=kant` or `?era=renaissance&era=mysticism`\n* queries are inclusive: `?author=aristotle&author=plato&era=contemporary+philosophy` will return results from Aristotle, Plato, and contemporary philosophy\n* query params will match the closest result of which it's a substring: (\"plat\" will match \"plato\", or \"contemp\" will match \"contemporary philosophy\")\n* In cases where pagination is used, 100 results max are shown. If the `cursor` property on the response body is greater than -1, it can be passed as a query param (also named `cursor`) to get the next set of results",
     "termsOfService": "",
     "contact": {
       "email": "prhineh1@meleteapi.dev"
@@ -11,11 +12,9 @@
       "name": "GNU GPL-3.0",
       "url": "https://www.gnu.org/licenses/gpl-3.0.html"
     },
-    "version": "1.0.1"
-  },
-  "externalDocs": {
-    "description": "",
-    "url": ""
+    "x-logo": {
+      "url": ""
+    }
   },
   "servers": [
     {
@@ -23,49 +22,14 @@
       "description": ""
     }
   ],
-  "tags": [
-    {
-      "name": "Quotes",
-      "description": "Query quotes by philosopher, era or randomly.",
-      "externalDocs": {
-        "description": "",
-        "url": ""
-      }
-    },
-    {
-      "name": "Schools",
-      "description": "returns list of philosophical schools of thought",
-      "externalDocs": {
-        "description": "",
-        "url": ""
-      }
-    },
-      {
-        "name": "Philosophers",
-        "description": "returns list of philosophers and related details",
-        "externalDocs": {
-          "description": "",
-          "url": ""
-        }
-    }
-  ],
   "paths": {
     "/quotes": {
       "get": {
-        "summary": "Returns an array of quotes based on passed query params",
-        "description": "\n* `author` and `era` query params can be set multiple times with different values in the same url (e.g., `?author=socrates&author=kant` or `?era=renaissance&era=mysticism`\n* queries are inclusive: `?author=aristotle&author=plato&era=contemporary+philosophy` will return quotes from Aristotle, Plato, and contemporary philosophy\n* `author` and `era` query params will match the closest author (\"plat\" will match \"plato\") or era (\"contemp\" will match \"contemporary philosophy\")\n* 100 results max are shown. If the `cursor` property on the response body is greater than -1, it can be passed as a query param (also named `cursor`) to get the next set of results\n* requesting just `/quotes` without any query params will return the first set of results from all quotes, which can then be paged through with `cursor`\n",
-        "operationId": "getquotes",
         "tags": [
           "Quotes"
         ],
         "parameters": [
           {
-            "in": "query",
-            "name": "author",
-            "description": "query quotes from this author",
-            "schema": {
-              "type": "string"
-            },
             "examples": {
               "plato": {
                 "value": "plato"
@@ -73,15 +37,15 @@
               "confucius": {
                 "value": "confucius"
               }
-            }
-          },
-          {
-            "in": "query",
-            "name": "era",
-            "description": "query quotes from this era of philosophy",
+            },
+            "name": "author",
+            "description": "query quotes from this author",
             "schema": {
               "type": "string"
             },
+            "in": "query"
+          },
+          {
             "examples": {
               "contemporary philosophy": {
                 "value": "contemporary philosophy"
@@ -89,37 +53,42 @@
               "islamic golden age": {
                 "value": "islamic golden age"
               }
-            }
+            },
+            "name": "era",
+            "description": "query quotes from this era of philosophy",
+            "schema": {
+              "type": "string"
+            },
+            "in": "query"
           },
           {
-            "in": "query",
             "name": "cursor",
             "description": "query the next set of results",
             "schema": {
-              "type": "number",
+              "minimum": -1,
               "exclusiveMinimum": true,
-              "minimum": -1
-            }
+              "type": "number"
+            },
+            "in": "query"
           }
         ],
         "responses": {
           "200": {
-            "description": "success",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
                     "cursor": {
-                      "type": "number",
-                      "description": "used for querying next set of results; if value is -1, there are no more results to query"
+                      "description": "used for querying next set of results; if value is -1, there are no more results to query",
+                      "type": "number"
                     },
                     "quotes": {
+                      "description": "array of quotes",
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/Quote"
-                      },
-                      "description": "array of quotes"
+                      }
                     }
                   }
                 },
@@ -140,27 +109,25 @@
                   }
                 }
               }
-            }
+            },
+            "description": "success"
           },
           "500": {
-            "content": {},
-            "description": "server error",
-            "headers": {}
+            "description": "server error"
           }
-        }
+        },
+        "operationId": "getquotes",
+        "summary": "Returns an array of quotes based on passed query params",
+        "description": ""
       }
     },
     "/quotes/random": {
       "get": {
-        "summary": "Returns a random quote",
-        "operationId": "randomQuote",
         "tags": [
           "Quotes"
         ],
-        "parameters": [],
         "responses": {
           "200": {
-            "description": "success",
             "content": {
               "application/json": {
                 "schema": {
@@ -178,45 +145,43 @@
                   }
                 }
               }
-            }
+            },
+            "description": "success"
           },
           "500": {
             "description": "server error"
           }
         },
+        "operationId": "randomQuote",
+        "summary": "Returns a random quote",
         "description": "Will return a different quote each time it's used."
       }
     },
     "/schools": {
       "get": {
-        "summary": "Returns an array of schools of philosophy",
-        "description": "",
-        "operationId": "getSchools",
         "tags": [
           "Schools"
         ],
-        "parameters": [],
         "responses": {
           "200": {
-            "description": "An array of schools of philosophy",
             "content": {
               "application/json": {
                 "schema": {
+                  "description": "array of Schools",
                   "type": "array",
                   "items": {
-                    "type": "object",
-                    "properties": {
-                      "name": {
-                        "type": "string",
-                        "description": "name"
-                      }
-                    },
+                    "description": "School",
                     "required": [
                       "name"
                     ],
-                    "description": "School"
-                  },
-                  "description": "array of Schools"
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "description": "name",
+                        "type": "string"
+                      }
+                    }
+                  }
                 },
                 "examples": {
                   "example": {
@@ -224,28 +189,25 @@
                   }
                 }
               }
-            }
+            },
+            "description": "An array of schools of philosophy"
           },
           "500": {
             "description": "server error"
           }
-        }
+        },
+        "operationId": "getSchools",
+        "summary": "Returns an array of schools of philosophy",
+        "description": ""
       }
     },
     "/philosophers": {
       "get": {
-        "summary": "Retrieves a list of philosophers",
-        "description": "Returns philosophers with filters for name, era, and school. Supports pagination via cursor.",
-        "operationId": "getPhilosophers",
-        "tags": ["Philosophers"],
+        "tags": [
+          "Philosophers"
+        ],
         "parameters": [
           {
-            "in": "query",
-            "name": "name",
-            "description": "Filter philosophers by name",
-            "schema": {
-              "type": "string"
-            },
             "examples": {
               "plato": {
                 "value": "plato"
@@ -253,15 +215,15 @@
               "confucius": {
                 "value": "confucius"
               }
-            }
-          },
-          {
-            "in": "query",
-            "name": "era",
-            "description": "Filter philosophers by era",
+            },
+            "name": "name",
+            "description": "Filter philosophers by name",
             "schema": {
               "type": "string"
             },
+            "in": "query"
+          },
+          {
             "examples": {
               "contemporary philosophy": {
                 "value": "contemporary philosophy"
@@ -269,48 +231,72 @@
               "islamic golden age": {
                 "value": "islamic golden age"
               }
-            }
+            },
+            "name": "era",
+            "description": "Filter philosophers by era",
+            "schema": {
+              "type": "string"
+            },
+            "in": "query"
           },
           {
-            "in": "query",
             "name": "school",
             "description": "Filter philosophers by school",
             "schema": {
               "type": "string"
-            }
+            },
+            "in": "query"
           },
           {
-            "in": "query",
             "name": "cursor",
             "description": "Cursor for pagination",
             "schema": {
               "type": "number"
-            }
+            },
+            "in": "query"
           }
         ],
         "responses": {
           "200": {
-            "description": "List of philosophers matching criteria",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
                     "cursor": {
-                      "type": "number",
-                      "description": "Cursor to be used for next page of results"
+                      "description": "Cursor to be used for next page of results",
+                      "type": "number"
                     },
                     "philosophers": {
+                      "description": "List of philosophers",
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/Philosopher"
-                      },
-                      "description": "List of philosophers"
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "example": {
+                    "value": {
+                      "cursor": -1,
+                      "philosophers": [
+                        {
+                          "name": "plato",
+                          "eras": [
+                            "ancient greek philosophy"
+                          ],
+                          "schools": [
+                            "platonic academy"
+                          ]
+                        }
+                      ]
                     }
                   }
                 }
               }
-            }
+            },
+            "description": "List of philosophers matching criteria"
           },
           "304": {
             "description": "No changes, cached version can be used"
@@ -318,7 +304,10 @@
           "500": {
             "description": "Internal server error"
           }
-        }
+        },
+        "operationId": "getPhilosophers",
+        "summary": "Retrieves a list of philosophers",
+        "description": ""
       }
     }
   },
@@ -328,95 +317,128 @@
         "type": "object",
         "properties": {
           "text": {
-            "type": "string",
-            "description": "quote text"
+            "description": "quote text",
+            "type": "string"
           },
           "author": {
-            "type": "string",
-            "description": "quote author"
+            "description": "quote author",
+            "type": "string"
           },
           "eras": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "pattern": "",
-              "enum": [
-                "contemporary philosophy",
-                "medieval philosophy",
-                "hellenistic philosophy",
-                "pre-socratic philosophy",
-                "ancient philosophy",
-                "ancient greek philosophy",
-                "reformation",
-                "17th century in philosophy",
-                "19th-century philosophy",
-                "islamic golden age",
-                "abbasid dynasty",
-                "18th century in philosophy",
-                "age of enlightenment",
-                "renaissance philosophy",
-                "early modern philosophy",
-                "modern philosophy",
-                "western philosophy",
-                "renaissance",
-                "neo-confucianism",
-                "hundred schools of thought",
-                "16th century in philosophy",
-                "edo period",
-                "british raj",
-                "church fathers",
-                "classical greece",
-                "zhou dynasty",
-                "12th century in philosophy",
-                "13th century in philosophy",
-                "high middle ages",
-                "crisis of the late middle ages",
-                "hindus",
-                "indian philosophy",
-                "patristics",
-                "14th century in philosophy",
-                "second scholasticism",
-                "byzantine philosophy",
-                "mysticism",
-                "late antiquity",
-                "qing dynasty",
-                "islamic calendar",
-                "song dynasty"
-              ]
-            },
-            "description": "eras the quote belongs to",
-            "uniqueItems": true
+            "$ref": "#/components/schemas/Era"
           }
         }
       },
       "Philosopher": {
+        "description": "Represents a philosopher with their associated schools and eras",
+        "required": [
+          "name",
+          "schools",
+          "eras"
+        ],
         "type": "object",
         "properties": {
           "name": {
-            "type": "string",
-            "description": "Name of the philosopher"
+            "description": "Name of the philosopher",
+            "type": "string"
           },
           "schools": {
+            "description": "List of philosophical schools the philosopher belongs to",
             "type": "array",
             "items": {
               "type": "string"
-            },
-            "description": "List of philosophical schools the philosopher belongs to"
+            }
           },
           "eras": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "Eras the philosopher is associated with"
+            "$ref": "#/components/schemas/Era"
           }
-        },
-        "required": ["name", "schools", "eras"],
-        "description": "Represents a philosopher with their associated schools and eras"
+        }
+      },
+      "Era": {
+        "description": "Represents a philosophical era",
+        "type": "array",
+        "items": {
+          "enum": [
+            "contemporary philosophy",
+            "medieval philosophy",
+            "hellenistic philosophy",
+            "pre-socratic philosophy",
+            "ancient philosophy",
+            "ancient greek philosophy",
+            "reformation",
+            "17th century in philosophy",
+            "19th-century philosophy",
+            "islamic golden age",
+            "abbasid dynasty",
+            "18th century in philosophy",
+            "age of enlightenment",
+            "renaissance philosophy",
+            "early modern philosophy",
+            "modern philosophy",
+            "western philosophy",
+            "renaissance",
+            "neo-confucianism",
+            "hundred schools of thought",
+            "16th century in philosophy",
+            "edo period",
+            "british raj",
+            "church fathers",
+            "classical greece",
+            "zhou dynasty",
+            "12th century in philosophy",
+            "13th century in philosophy",
+            "high middle ages",
+            "crisis of the late middle ages",
+            "hindus",
+            "indian philosophy",
+            "patristics",
+            "14th century in philosophy",
+            "second scholasticism",
+            "byzantine philosophy",
+            "mysticism",
+            "late antiquity",
+            "qing dynasty",
+            "islamic calendar",
+            "song dynasty"
+          ],
+          "type": "string"
+        }
       }
-      
     },
     "securitySchemes": {},
+    "headers": {},
+    "responses": {},
     "parameters": {}
-  }
+  },
+  "tags": [
+    {
+      "name": "Quotes",
+      "description": "Query quotes by philosopher, era or randomly.",
+      "externalDocs": {
+        "description": "",
+        "url": ""
+      }
+    },
+    {
+      "name": "Schools",
+      "description": "returns list of philosophical schools of thought",
+      "externalDocs": {
+        "description": "",
+        "url": ""
+      }
+    },
+    {
+      "name": "Philosophers",
+      "description": "returns list of philosophers and related details",
+      "externalDocs": {
+        "description": "",
+        "url": ""
+      }
+    }
+  ],
+  "externalDocs": {
+    "description": "",
+    "url": ""
+  },
+  "security": []
 }
